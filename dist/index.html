@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Amazing 3D Solar System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --nasa-blue: #0b3d91;
+      --nasa-red: #fc3d21;
+      --nasa-gray: #5a6670;
+      --space-black: #000814;
+      --cosmic-blue: #001d3d;
+      --star-white: #ffd60a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background: var(--space-black); 
+      font-family: 'Rajdhani', monospace;
+      color: white;
+    }
+    
+    canvas { display: block; }
+    
+    /* Mission Control panel - matching celestial bodies style */
+    .controls {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
+      color: white;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
+      min-width: 180px;
+      max-height: 350px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 11px;
+    }
+    
+    .control-group {
+      margin-bottom: 6px;
+    }
+    
+    .control-group label {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 10px;
+      color: #ccc;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+      margin-bottom: 2px;
+    }
+    
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      background: var(--star-white);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(255, 214, 10, 0.5);
+    }
+    
+    .control-group button {
+      background: linear-gradient(135deg, var(--nasa-gray), #404040);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 3px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-right: 3px;
+      margin-bottom: 2px;
+      font-size: 9px;
+      font-family: 'Rajdhani', monospace;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+    
+    .control-group button:hover {
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    .control-group button.active {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      box-shadow: 0 0 10px rgba(252, 61, 33, 0.5);
+    }
+
+    .value-display {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      color: var(--star-white);
+      font-weight: 500;
+    }
+
+    /* Control panel header - matching celestial style */
+    .control-header {
+      padding: 8px;
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      border-bottom: 1px solid rgba(255, 214, 10, 0.3);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+    }
+
+    .control-header h3 {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-toggle-icon {
+      font-size: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .control-content {
+      max-height: 300px;
+      overflow-y: auto;
+      transition: max-height 0.3s ease;
+      padding: 8px;
+    }
+
+    .controls.collapsed .control-content {
+      max-height: 0;
+      padding: 0 8px;
+    }
+
+    .controls.collapsed .control-toggle-icon {
+      transform: rotate(180deg);
+    }
+    
+    /* Minimalist info panel */
+    .info {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      background: linear-gradient(135deg, rgba(0, 8, 20, 0.9), rgba(0, 29, 61, 0.9));
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      backdrop-filter: blur(10px);
+      font-size: 10px;
+      font-family: 'Rajdhani', monospace;
+      max-width: 200px;
+    }
+    
+    /* Improved celestial bodies panel */
+    .celestial-panel {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
+      color: white;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
+      min-width: 180px;
+      max-height: 350px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .celestial-header {
+      padding: 8px;
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      border-bottom: 1px solid rgba(255, 214, 10, 0.3);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .celestial-header h4 {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toggle-icon {
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .celestial-content {
+      max-height: 290px;
+      overflow-y: auto;
+      transition: max-height 0.3s ease;
+    }
+
+    .celestial-panel.collapsed .celestial-content {
+      max-height: 0;
+    }
+
+    .celestial-panel.collapsed .toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .celestial-controls {
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 214, 10, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .label-toggle {
+      background: linear-gradient(135deg, var(--nasa-gray), #404040);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      font-family: 'Rajdhani', monospace;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .label-toggle:hover {
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
+    }
+
+    .label-toggle.active {
+      background: linear-gradient(135deg, var(--star-white), #ffa000);
+      color: var(--space-black);
+      box-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+    }
+    
+    .planet-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 11px;
+    }
+    
+    .planet-item:hover {
+      background: rgba(255, 214, 10, 0.1);
+      transform: translateX(3px);
+    }
+
+    .planet-item strong {
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    
+    .planet-item.planet strong {
+      color: #64b5f6;
+    }
+
+    .planet-item.dwarf strong {
+      color: var(--star-white);
+    }
+
+    .planet-item.asteroid strong {
+      color: #ff8c42;
+    }
+
+    .planet-item.tno strong {
+      color: #ff6b9d;
+    }
+
+    .category-header {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      color: white;
+      padding: 6px 12px;
+      margin: 8px 0 4px 0;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 214, 10, 0.3);
+    }
+
+    .planet-item small {
+      font-family: 'Rajdhani', monospace;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    /* Planet name labels in 3D space */
+    .planet-label {
+      position: absolute;
+      background: rgba(11, 61, 145, 0.9);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+      border: 1px solid rgba(255, 214, 10, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Moon name labels in 3D space */
+    .moon-label {
+      position: absolute;
+      background: rgba(252, 61, 33, 0.9);
+      color: white;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-family: 'Rajdhani', monospace;
+      font-size: 8px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      pointer-events: none;
+      border: 1px solid rgba(255, 214, 10, 0.4);
+      backdrop-filter: blur(3px);
+      z-index: 999;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Custom scrollbar */
+    .celestial-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .celestial-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .celestial-content::-webkit-scrollbar-thumb {
+      background: var(--star-white);
+      border-radius: 2px;
+    }
+
+    /* Custom scrollbar for mission control */
+    .control-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .control-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .control-content::-webkit-scrollbar-thumb {
+      background: var(--star-white);
+      border-radius: 2px;
+    }
+
+    /* UI Hide/Show functionality */
+    .ui-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-20px);
+    }
+
+    /* Floating Music Control */
+    .floating-music-control {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      gap: 8px;
+    }
+
+    .floating-music-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid var(--nasa-gold);
+      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
+      color: var(--star-white);
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(11, 61, 145, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .floating-music-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.9), rgba(255, 193, 7, 0.9));
+      color: var(--deep-space);
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(255, 214, 10, 0.4);
+    }
+
+    .floating-music-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Mobile responsiveness for floating controls */
+    @media (max-width: 768px) {
+      .floating-music-control {
+        bottom: 70px;
+        right: 15px;
+      }
+      
+      .floating-music-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+      }
+    }
+
+    #showUIBtn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
+      color: white;
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'Rajdhani', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
+      display: none;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+
+    #showUIBtn:hover {
+      background: linear-gradient(135deg, rgba(252, 61, 33, 0.9), rgba(11, 61, 145, 0.9));
+      transform: scale(1.05);
+    }
+
+    /* NASA-styled Footer */
+    .nasa-footer {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      backdrop-filter: none;
+      z-index: 1001;
+      padding: 5px 8px;
+    }
+
+    .footer-content {
+      text-align: right;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .footer-content a {
+      color: rgba(255, 214, 10, 0.8);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .footer-content a:hover {
+      color: rgba(255, 140, 66, 0.9);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+      transform: scale(1.05);
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-BYVSyEDj.js"></script>
+</head>
+<body>
+  <!-- Show UI Button (hidden by default) -->
+  <button id="showUIBtn">Show UI</button>
+
+  <div class="controls collapsed" id="uiControls">
+    <div class="control-header" onclick="toggleControlPanel()">
+      <h3>Mission Control <span class="control-toggle-icon">►</span></h3>
+    </div>
+    <div class="control-content">
+      <div class="control-group">
+        <label>Speed (Earth Time)</label>
+        <input type="range" id="speedControl" min="0" max="10" step="0.1" value="0.4">
+        <span id="speedValue" class="value-display">0.4x Slow</span>
+      </div>
+      
+      <div class="control-group">
+        <label>Bloom</label>
+        <input type="range" id="bloomControl" min="0" max="2" step="0.1" value="0.5">
+        <span id="bloomValue" class="value-display">0.5</span>
+      </div>
+      
+      <div class="control-group">
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+        <button id="hideUIBtn">Hide UI</button>
+      </div>
+      
+      <div class="control-group">
+        <label>Atmosphere</label>
+        <button id="musicBtn">🎵 Music</button>
+        <button id="muteMusicBtn" style="display: none;">🔇 Mute</button>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.3" style="width: 80%; margin-top: 5px;">
+        <span id="volumeValue" class="value-display">30%</span>
+      </div>
+      
+      <div class="control-group">
+        <label>Toggle</label>
+        <button id="orbitsBtn" class="active">Orbits</button>
+        <button id="moonsBtn" class="active">Moons</button>
+      </div>
+      
+      <div class="control-group">
+        <label>Asteroid Belts</label>
+        <button id="mainAsteroidsBtn" class="active">Main Belt</button>
+        <button id="trojansBtn" class="active">Trojans</button>
+        <button id="kuiperBtn" class="active">Kuiper</button>
+        <button id="scatteredBtn" class="active">Scattered</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="info">
+    <strong style="font-family: 'Orbitron', monospace; color: #ffd60a;">NASA SOLAR EXPLORER</strong><br>
+    🪐 8 Planets<br>
+    🌍 11 Dwarf Planets<br>
+    ☄️ 4 Asteroid Belts<br>
+    🌌 Trans-Neptunian Objects<br>
+    🌙 50+ Moons<br>
+    ✨ Glowing Orbit Rings<br>
+    🎵 Atmospheric Music<br>
+  </div>
+  
+  <div class="celestial-panel collapsed" id="celestialPanel">
+    <div class="celestial-header" onclick="toggleCelestialPanel()">
+      <h4>Celestial Bodies <span class="toggle-icon">►</span></h4>
+    </div>
+    <div class="celestial-content">
+      <div class="celestial-controls">
+        <button id="labelToggle" class="label-toggle">Show Planet Names</button>
+        <button id="moonLabelToggle" class="label-toggle">Show Moon Names</button>
+      </div>
+      <div id="planetList"></div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="nasa-footer">
+    <div class="footer-content">
+      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya</a> & Copilot 2025
+    </div>
+  </footer>
+  
+  <!-- Floating Music Control -->
+  <div class="floating-music-control">
+    <button id="floatingMusicBtn" class="floating-music-btn" title="Play Interstellar Soundtrack">
+      🎵
+    </button>
+    <button id="floatingMuteMusicBtn" class="floating-music-btn" style="display: none;" title="Mute Music">
+      🔇
+    </button>
+  </div>
+  
+  <!-- Hidden audio element for space music -->
+  <audio id="spaceMusic" loop preload="none">
+    <!-- Your custom Interstellar soundtrack -->
+    <source src="/textures/interstellar.mp3" type="audio/mpeg">
+    <!-- Fallback sources for compatibility -->
+    <source src="https://www.soundjay.com/misc/sounds-790.mp3" type="audio/mpeg">
+    <source src="https://freesound.org/data/previews/316/316847_5195967-lq.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  
+  <script>
+    function toggleCelestialPanel() {
+      const panel = document.getElementById('celestialPanel');
+      const icon = panel.querySelector('.toggle-icon');
+      
+      panel.classList.toggle('collapsed');
+      
+      // Update icon based on state
+      if (panel.classList.contains('collapsed')) {
+        icon.textContent = '►';
+      } else {
+        icon.textContent = '▼';
+      }
+    }
+
+    function toggleControlPanel() {
+      const panel = document.getElementById('uiControls');
+      const icon = panel.querySelector('.control-toggle-icon');
+      
+      panel.classList.toggle('collapsed');
+      
+      // Update icon based on state
+      if (panel.classList.contains('collapsed')) {
+        icon.textContent = '►';
+      } else {
+        icon.textContent = '▼';
+      }
+    }
+  </script>
+</body>
+</html>
