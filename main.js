@@ -2691,3 +2691,4 @@ window.addEventListener("resize", () => {
   updatePlanetLabels();
   updateMoonLabels();
 });
+
