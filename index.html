@@ -2,18 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Amazing 3D Solar System</title>
+  <title>NASA Solar System Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
+      /* NASA Official Colors */
       --nasa-blue: #0b3d91;
       --nasa-red: #fc3d21;
-      --nasa-gray: #5a6670;
-      --space-black: #000814;
+      --nasa-white: #ffffff;
+      --nasa-gray: #e5e5e5;
+      --nasa-dark-gray: #5a6670;
+      --nasa-black: #000000;
+      
+      /* Space Themed Colors */
+      --deep-space: #000814;
       --cosmic-blue: #001d3d;
-      --star-white: #ffd60a;
+      --star-gold: #ffd60a;
+      --nebula-purple: #7209b7;
+      --comet-blue: #4cc9f0;
+      --asteroid-orange: #f77f00;
+      --planet-green: #2a9d8f;
+      --ring-saturn: #e9c46a;
+      
+      /* UI Colors */
+      --panel-bg: rgba(11, 61, 145, 0.85);
+      --panel-border: rgba(255, 214, 10, 0.3);
+      --button-primary: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      --button-secondary: linear-gradient(135deg, var(--nasa-dark-gray), #404040);
+      --button-active: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      --button-hover: linear-gradient(135deg, var(--nasa-blue), #0a2a66);
     }
 
     * {
@@ -23,22 +42,22 @@
     body { 
       margin: 0; 
       overflow: hidden; 
-      background: var(--space-black); 
-      font-family: 'Rajdhani', monospace;
-      color: white;
+      background: var(--deep-space); 
+      font-family: 'Titillium Web', sans-serif;
+      color: var(--nasa-gray);
     }
     
     canvas { display: block; }
     
-    /* Mission Control panel - matching celestial bodies style */
+    /* Mission Control panel - NASA themed */
     .controls {
       position: absolute;
       top: 15px;
       left: 15px;
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
+      background: var(--panel-bg);
+      color: var(--nasa-white);
       border-radius: 6px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
       min-width: 180px;
@@ -46,6 +65,7 @@
       overflow: hidden;
       transition: all 0.3s ease;
       font-size: 11px;
+      font-family: 'Titillium Web', sans-serif;
     }
     
     .control-group {
@@ -56,10 +76,11 @@
       display: block;
       margin-bottom: 2px;
       font-size: 10px;
-      color: #ccc;
+      color: var(--nasa-gray);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-family: 'Titillium Web', sans-serif;
     }
     
     .control-group input[type="range"] {
@@ -75,15 +96,15 @@
       appearance: none;
       width: 10px;
       height: 10px;
-      background: var(--star-white);
+      background: var(--star-gold);
       border-radius: 50%;
       cursor: pointer;
       box-shadow: 0 0 6px rgba(255, 214, 10, 0.5);
     }
     
     .control-group button {
-      background: linear-gradient(135deg, var(--nasa-gray), #404040);
-      color: white;
+      background: var(--button-secondary);
+      color: var(--nasa-white);
       border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 3px 6px;
       border-radius: 3px;
@@ -91,7 +112,7 @@
       margin-right: 3px;
       margin-bottom: 2px;
       font-size: 9px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -99,28 +120,28 @@
     }
     
     .control-group button:hover {
-      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      background: var(--button-hover);
       box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
       transform: translateY(-1px);
     }
     
     .control-group button.active {
-      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      background: var(--button-active);
       box-shadow: 0 0 10px rgba(252, 61, 33, 0.5);
     }
 
     .value-display {
       font-family: 'Orbitron', monospace;
       font-size: 9px;
-      color: var(--star-white);
+      color: var(--star-gold);
       font-weight: 500;
     }
 
-    /* Control panel header - matching celestial style */
+    /* Control panel header - NASA themed */
     .control-header {
       padding: 8px;
       background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
-      border-bottom: 1px solid rgba(255, 214, 10, 0.3);
+      border-bottom: 1px solid var(--panel-border);
       cursor: pointer;
       user-select: none;
       transition: all 0.3s ease;
@@ -131,7 +152,7 @@
       font-family: 'Orbitron', monospace;
       font-weight: 700;
       font-size: 11px;
-      color: white;
+      color: var(--nasa-white);
       text-transform: uppercase;
       letter-spacing: 1px;
       display: flex;
@@ -165,14 +186,14 @@
       position: absolute;
       bottom: 15px;
       left: 15px;
-      background: linear-gradient(135deg, rgba(0, 8, 20, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
+      background: rgba(0, 29, 61, 0.85);
+      color: var(--nasa-white);
       padding: 10px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
       font-size: 10px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       max-width: 200px;
     }
     
@@ -181,22 +202,23 @@
       position: absolute;
       top: 15px;
       right: 15px;
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
+      background: var(--panel-bg);
+      color: var(--nasa-white);
       border-radius: 6px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
       min-width: 180px;
       max-height: 350px;
       overflow: hidden;
       transition: all 0.3s ease;
+      font-family: 'Titillium Web', sans-serif;
     }
 
     .celestial-header {
       padding: 8px;
       background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
-      border-bottom: 1px solid rgba(255, 214, 10, 0.3);
+      border-bottom: 1px solid var(--panel-border);
       cursor: pointer;
       user-select: none;
     }
@@ -206,7 +228,7 @@
       font-family: 'Orbitron', monospace;
       font-weight: 700;
       font-size: 13px;
-      color: white;
+      color: var(--nasa-white);
       text-transform: uppercase;
       letter-spacing: 1px;
       display: flex;
@@ -243,14 +265,14 @@
     }
 
     .label-toggle {
-      background: linear-gradient(135deg, var(--nasa-gray), #404040);
-      color: white;
+      background: var(--button-secondary);
+      color: var(--nasa-white);
       border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 4px 8px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 10px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -259,13 +281,13 @@
     }
 
     .label-toggle:hover {
-      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      background: var(--button-hover);
       box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
     }
 
     .label-toggle.active {
-      background: linear-gradient(135deg, var(--star-white), #ffa000);
-      color: var(--space-black);
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
       box-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
     }
     
@@ -275,6 +297,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       font-size: 11px;
+      font-family: 'Titillium Web', sans-serif;
     }
     
     .planet-item:hover {
@@ -293,20 +316,20 @@
     }
 
     .planet-item.dwarf strong {
-      color: var(--star-white);
+      color: var(--star-gold);
     }
 
     .planet-item.asteroid strong {
-      color: #ff8c42;
+      color: var(--asteroid-orange);
     }
 
     .planet-item.tno strong {
-      color: #ff6b9d;
+      color: var(--nebula-purple);
     }
 
     .category-header {
       background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
-      color: white;
+      color: var(--nasa-white);
       padding: 6px 12px;
       margin: 8px 0 4px 0;
       font-family: 'Orbitron', monospace;
@@ -315,11 +338,11 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       border-radius: 4px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
     }
 
     .planet-item small {
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-weight: 400;
       opacity: 0.8;
     }
@@ -328,7 +351,7 @@
     .planet-label {
       position: absolute;
       background: rgba(11, 61, 145, 0.9);
-      color: white;
+      color: var(--nasa-white);
       padding: 2px 6px;
       border-radius: 3px;
       font-family: 'Orbitron', monospace;
@@ -347,10 +370,10 @@
     .moon-label {
       position: absolute;
       background: rgba(252, 61, 33, 0.9);
-      color: white;
+      color: var(--nasa-white);
       padding: 1px 4px;
       border-radius: 2px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-size: 8px;
       font-weight: 500;
       text-transform: uppercase;
@@ -373,7 +396,7 @@
     }
 
     .celestial-content::-webkit-scrollbar-thumb {
-      background: var(--star-white);
+      background: var(--star-gold);
       border-radius: 2px;
     }
 
@@ -388,7 +411,7 @@
     }
 
     .control-content::-webkit-scrollbar-thumb {
-      background: var(--star-white);
+      background: var(--star-gold);
       border-radius: 2px;
     }
 
@@ -413,9 +436,9 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      border: 2px solid var(--nasa-gold);
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: var(--star-white);
+      border: 2px solid var(--star-gold);
+      background: var(--panel-bg);
+      color: var(--star-gold);
       font-size: 18px;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -424,6 +447,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: 'Titillium Web', sans-serif;
     }
 
     .floating-music-btn:hover {
@@ -455,12 +479,12 @@
       position: absolute;
       top: 15px;
       right: 15px;
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      background: var(--panel-bg);
+      color: var(--nasa-white);
+      border: 1px solid var(--panel-border);
       border-radius: 6px;
       padding: 8px 12px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -553,10 +577,13 @@
         <label>Toggle</label>
         <button id="orbitsBtn" class="active">Orbits</button>
         <button id="moonsBtn" class="active">Moons</button>
+        <button id="realAsteroidsBtn" class="active">Real Asteroids</button>
+        <button id="cometsBtn" class="active">Comets</button>
       </div>
       
       <div class="control-group">
         <label>Asteroid Belts</label>
+        <button id="allAsteroidsBtn" class="active">All Belts</button>
         <button id="mainAsteroidsBtn" class="active">Main Belt</button>
         <button id="trojansBtn" class="active">Trojans</button>
         <button id="kuiperBtn" class="active">Kuiper</button>
@@ -566,7 +593,7 @@
   </div>
   
   <div class="info">
-    <strong style="font-family: 'Orbitron', monospace; color: #ffd60a;">NASA SOLAR EXPLORER</strong><br>
+    <strong style="font-family: 'Orbitron', monospace; color: var(--star-gold);">NASA SOLAR EXPLORER</strong><br>
     🪐 8 Planets<br>
     🌍 11 Dwarf Planets<br>
     ☄️ 4 Asteroid Belts<br>
@@ -574,6 +601,7 @@
     🌙 50+ Moons<br>
     ✨ Glowing Orbit Rings<br>
     🎵 Atmospheric Music<br>
+    🛰️ Real-time NASA Data<br>
   </div>
   
   <div class="celestial-panel collapsed" id="celestialPanel">
