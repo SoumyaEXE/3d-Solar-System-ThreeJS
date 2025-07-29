@@ -2163,27 +2163,8 @@ function showPlanetInfoCard(body, planetIndex) {
   const moonCount = document.getElementById('moonCount');
   const moonsContainer = document.getElementById('moonsContainer');
 
-  // Set planet icon based on type and name
-  const planetIcons = {
-    'Mercury': '☿️',
-    'Venus': '♀️',
-    'Earth': '🌍',
-    'Mars': '♂️',
-    'Jupiter': '♃',
-    'Saturn': '🪐',
-    'Uranus': '⛢',
-    'Neptune': '♆',
-    'Pluto': '♇',
-    'Ceres': '⚳',
-    'Eris': '⚫',
-    'Makemake': '🔴',
-    'Haumea': '⚪',
-    'Sedna': '🔴'
-  };
-
-  // Set planet info
-  planetIcon.textContent = planetIcons[body.name] || (body.type === 'planet' ? '🪐' : 
-                           body.type === 'dwarf' ? '⚪' : '🪨');
+  // Remove planet icon emojis
+  planetIcon.textContent = '';
   planetName.textContent = body.name.toUpperCase();
   
   // Set type badge
@@ -2691,4 +2672,3 @@ window.addEventListener("resize", () => {
   updatePlanetLabels();
   updateMoonLabels();
 });
-
