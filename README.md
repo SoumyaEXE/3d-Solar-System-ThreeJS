@@ -19,7 +19,7 @@ A visually interactive 3D Solar System simulation built with [Three.js](https://
 
 ## Screenshots
 
-
+[![localhost-5173-High-Res.png](https://i.postimg.cc/fLTMbH93/localhost-5173-High-Res.png)](https://postimg.cc/PLcg3QKh)
 
 ---
 
