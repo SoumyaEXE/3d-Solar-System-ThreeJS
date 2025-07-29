@@ -855,7 +855,8 @@ const celestialBodies = [
     type: "planet",
     info: "Hottest planet in our solar system with surface temperatures of 462°C. Has a thick, toxic atmosphere of carbon dioxide.",
     discoveryYear: "Ancient",
-    moons: []
+    moons: [],
+    rotationDirection: -1
   },
   {
     name: "Earth",
@@ -985,7 +986,8 @@ const celestialBodies = [
       { name: "Oberon", size: 0.10, dist: 3.4, speed: 0.075, color: new THREE.Color(0.5, 0.5, 0.55), info: "Outermost major moon with ancient cratered surface.", initialAngle: 5.3 },
       { name: "Miranda", size: 0.06, dist: 1.8, speed: 0.67, color: new THREE.Color(0.53, 0.53, 0.53), info: "Most unusual moon with extreme geological features.", initialAngle: 3.7 },
       { name: "Puck", size: 0.03, dist: 1.5, speed: 1.18, color: new THREE.Color(0.45, 0.45, 0.5), info: "Small irregular moon discovered by Voyager 2.", initialAngle: 0.8 }
-    ]
+    ],
+     rotationDirection: -1
   },
   {
     name: "Neptune",
@@ -1567,9 +1569,12 @@ function animate() {
     
     sun.rotation.y += 0.002 * realTimeMultiplier;
 
-    planetMeshes.forEach((p) => {
-      p.pivot.rotation.y += p.speed * realTimeMultiplier;
-      p.mesh.rotation.y += 0.01 * realTimeMultiplier;
+    planetMeshes.forEach((p, index) => {
+  const body = celestialBodies[index];
+  const rotationDirection = body.rotationDirection || 1; // Default to prograde (1)
+  
+  p.pivot.rotation.y += p.speed * realTimeMultiplier;
+  p.mesh.rotation.y += 0.01 * realTimeMultiplier * rotationDirection; // Apply 
       
       if (p.orbit && p.orbit.userData && p.orbit.userData.pulseSpeed) {
         try {
@@ -2462,7 +2467,18 @@ function onMouseClick(event) {
     
     // Check if it's the sun
     if (intersectedObject === sun) {
-      followSun();
+      // Show info card for Sun, do NOT lock/follow camera
+      showPlanetInfoCard({
+        name: 'Sun',
+        type: 'star',
+        info: 'The Sun is the star at the center of the Solar System.',
+        size: 5,
+        color: 0xffff00,
+        texture: 'sun.jpg',
+        speed: 0,
+        moons: [],
+        orbit: null
+      }, -1);
       return;
     }
     
