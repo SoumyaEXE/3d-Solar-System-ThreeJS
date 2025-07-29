@@ -33,7 +33,7 @@ A visually interactive 3D Solar System simulation built with [Three.js](https://
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/3d-solar-system-three-js.git
+git clone https://github.com/soumyaexe/3d-solar-system-three-js.git
 cd 3d-solar-system-three-js
 npm install
 ```
