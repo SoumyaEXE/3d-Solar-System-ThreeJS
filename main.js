@@ -1620,14 +1620,21 @@ function animate() {
     const planetPos = new THREE.Vector3();
     followingPlanet.mesh.getWorldPosition(planetPos);
     
-    const planetMovement = planetPos.clone().sub(lastPlanetPosition);
-    
-    if (!lastPlanetPosition.equals(new THREE.Vector3(0, 0, 0))) {
-      camera.position.add(planetMovement);
-      controls.target.add(planetMovement);
-    } else {
-      camera.position.copy(planetPos.clone().add(followOffset));
+    if (followingType === 'sun') {
+      // For Sun following, allow zoom but maintain target
       controls.target.copy(planetPos);
+      // Don't override camera position - let controls handle zoom
+    } else {
+      // For planets and moons, use original behavior
+      const planetMovement = planetPos.clone().sub(lastPlanetPosition);
+      
+      if (!lastPlanetPosition.equals(new THREE.Vector3(0, 0, 0))) {
+        camera.position.add(planetMovement);
+        controls.target.add(planetMovement);
+      } else {
+        camera.position.copy(planetPos.clone().add(followOffset));
+        controls.target.copy(planetPos);
+      }
     }
     
     lastPlanetPosition.copy(planetPos);
@@ -1771,12 +1778,7 @@ if (pauseBtn) {
 const resetBtn = document.getElementById('resetBtn');
 if (resetBtn) {
   resetBtn.addEventListener('click', () => {
-    followingPlanet = null;
-    lastPlanetPosition.set(0, 0, 0);
-    userCameraOffset.set(0, 0, 0);
-    camera.position.set(0, 30, 70);
-    controls.target.set(0, 0, 0);
-    controls.reset();
+    stopFollowingPlanet();
   });
 }
 
@@ -2146,12 +2148,298 @@ if (planetList) {
   });
 }
 
-// Raycaster for planet clicking
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+// Planet Information Card Functions
+function showPlanetInfoCard(body, planetIndex) {
+  const card = document.getElementById('planetInfoCard');
+  const planetName = document.getElementById('planetName');
+  const planetIcon = document.getElementById('planetIcon');
+  const planetTypeBadge = document.getElementById('planetTypeBadge');
+  const orbitalPeriod = document.getElementById('orbitalPeriod');
+  const sizeRelative = document.getElementById('sizeRelative');
+  const distanceFromSun = document.getElementById('distanceFromSun');
+  const discoveryYear = document.getElementById('discoveryYear');
+  const planetDescription = document.getElementById('planetDescription');
+  const moonsSection = document.getElementById('moonsSection');
+  const moonCount = document.getElementById('moonCount');
+  const moonsContainer = document.getElementById('moonsContainer');
 
+  // Set planet icon based on type and name
+  const planetIcons = {
+    'Mercury': '☿️',
+    'Venus': '♀️',
+    'Earth': '🌍',
+    'Mars': '♂️',
+    'Jupiter': '♃',
+    'Saturn': '🪐',
+    'Uranus': '⛢',
+    'Neptune': '♆',
+    'Pluto': '♇',
+    'Ceres': '⚳',
+    'Eris': '⚫',
+    'Makemake': '🔴',
+    'Haumea': '⚪',
+    'Sedna': '🔴'
+  };
+
+  // Set planet info
+  planetIcon.textContent = planetIcons[body.name] || (body.type === 'planet' ? '🪐' : 
+                           body.type === 'dwarf' ? '⚪' : '🪨');
+  planetName.textContent = body.name.toUpperCase();
+  
+  // Set type badge
+  const typeLabels = {
+    'planet': 'PLANET',
+    'dwarf': 'DWARF PLANET',
+    'asteroid': 'ASTEROID',
+    'tno': 'TNO'
+  };
+  planetTypeBadge.textContent = typeLabels[body.type] || 'CELESTIAL BODY';
+
+  // Calculate orbital period in years (simplified calculation)
+  const orbitalPeriodYears = Math.sqrt(Math.pow(body.dist, 3));
+  if (orbitalPeriodYears < 1) {
+    orbitalPeriod.textContent = `${Math.round(orbitalPeriodYears * 365)} days`;
+  } else if (orbitalPeriodYears < 10) {
+    orbitalPeriod.textContent = `${orbitalPeriodYears.toFixed(1)} years`;
+  } else {
+    orbitalPeriod.textContent = `${Math.round(orbitalPeriodYears)} years`;
+  }
+
+  sizeRelative.textContent = `${body.size}x Earth`;
+  distanceFromSun.textContent = `${body.dist} AU`;
+  discoveryYear.textContent = body.discoveryYear;
+  planetDescription.textContent = body.info;
+
+  // Handle moons section
+  if (body.moons && body.moons.length > 0) {
+    moonsSection.style.display = 'block';
+    moonCount.textContent = body.moons.length;
+    
+    // Clear existing moons
+    moonsContainer.innerHTML = '';
+    
+    // Add each moon
+    body.moons.forEach((moon, moonIndex) => {
+      const moonItem = document.createElement('div');
+      moonItem.className = 'moon-item';
+      
+      const orbitalPeriodDays = moon.speed > 0 ? (2 * Math.PI / moon.speed).toFixed(1) : 'Unknown';
+      
+      moonItem.innerHTML = `
+        <div class="moon-name">🌙 ${moon.name}</div>
+        <div class="moon-info">
+          Size: ${moon.size}x Earth<br>
+          Distance: ${moon.dist} planet radii<br>
+          Period: ${orbitalPeriodDays} days
+        </div>
+        <div class="moon-follow-btn">
+          <button class="follow-moon-btn">🎯 Follow</button>
+        </div>
+      `;
+      
+      // Add click event to show moon description and follow functionality
+      moonItem.style.cursor = 'pointer';
+      const moonNameDiv = moonItem.querySelector('.moon-name');
+      const moonInfoDiv = moonItem.querySelector('.moon-info');
+      
+      moonNameDiv.addEventListener('click', () => {
+        if (moon.info) {
+          alert(`🌙 ${moon.name}\n\n${moon.info}`);
+        }
+      });
+      
+      moonInfoDiv.addEventListener('click', () => {
+        if (moon.info) {
+          alert(`🌙 ${moon.name}\n\n${moon.info}`);
+        }
+      });
+      
+      // Add follow moon functionality
+      const followMoonBtn = moonItem.querySelector('.follow-moon-btn');
+      followMoonBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const planetObj = planetMeshes[planetIndex];
+        if (planetObj.moons && planetObj.moons[moonIndex]) {
+          followMoon(planetObj.moons[moonIndex].mesh, moon, body.name);
+          hidePlanetInfoCard();
+        }
+      });
+      
+      moonsContainer.appendChild(moonItem);
+    });
+  } else {
+    moonsSection.style.display = 'none';
+  }
+
+  // Show the card
+  card.style.display = 'block';
+
+  // Update follow button state
+  updateFollowButtonState(planetIndex);
+}
+
+// Variables to track current planet being displayed in info card
+let currentPlanetIndex = null;
+let followingTarget = null; // Can be planet, moon, or sun
+let followingType = null; // 'planet', 'moon', or 'sun'
+
+// Update follow button state based on current following status
+function updateFollowButtonState(planetIndex) {
+  const followBtn = document.getElementById('followPlanetBtn');
+  const stopFollowBtn = document.getElementById('stopFollowBtn');
+  const currentPlanet = planetMeshes[planetIndex];
+  
+  currentPlanetIndex = planetIndex;
+  
+  if (followingTarget === currentPlanet && followingType === 'planet') {
+    followBtn.textContent = '🛑 STOP FOLLOWING';
+    followBtn.classList.add('following');
+    if (stopFollowBtn) {
+      stopFollowBtn.style.display = 'block';
+      stopFollowBtn.classList.add('active');
+    }
+  } else {
+    followBtn.textContent = '🎯 FOLLOW PLANET';
+    followBtn.classList.remove('following');
+    if (stopFollowBtn && !followingTarget) {
+      stopFollowBtn.style.display = 'none';
+      stopFollowBtn.classList.remove('active');
+    }
+  }
+}
+
+// Follow planet function
+function followPlanet(planetIndex) {
+  const body = celestialBodies[planetIndex];
+  const planet = planetMeshes[planetIndex];
+  
+  // Set camera to follow planet
+  followingTarget = planet;
+  followingType = 'planet';
+  followingPlanet = planet; // Keep for backward compatibility
+  const distance = Math.max(body.size * 8, 15);
+  followOffset.set(distance, distance * 0.5, distance);
+  lastPlanetPosition.set(0, 0, 0);
+  userCameraOffset.set(0, 0, 0);
+  
+  // Standard follow mode for planets (limited zoom)
+  controls.enableZoom = true;
+  controls.minDistance = distance * 0.5;
+  controls.maxDistance = distance * 3;
+  
+  // Update button states
+  updateFollowButtonState(planetIndex);
+  
+  console.log(`Now following ${body.name}`);
+}
+
+// Follow moon function
+function followMoon(moonMesh, moonData, parentPlanetName) {
+  followingTarget = moonMesh;
+  followingType = 'moon';
+  followingPlanet = { mesh: moonMesh }; // For compatibility with existing animation loop
+  const distance = Math.max(moonData.size * 12, 8);
+  followOffset.set(distance, distance * 0.5, distance);
+  lastPlanetPosition.set(0, 0, 0);
+  userCameraOffset.set(0, 0, 0);
+  
+  // Standard follow mode for moons (limited zoom)
+  controls.enableZoom = true;
+  controls.minDistance = distance * 0.3;
+  controls.maxDistance = distance * 4;
+  
+  // Update stop follow button
+  const stopFollowBtn = document.getElementById('stopFollowBtn');
+  if (stopFollowBtn) {
+    stopFollowBtn.style.display = 'block';
+    stopFollowBtn.classList.add('active');
+  }
+  
+  console.log(`Now following ${moonData.name} of ${parentPlanetName}`);
+}
+
+// Follow sun function
+function followSun() {
+  followingTarget = sun;
+  followingType = 'sun';
+  followingPlanet = { mesh: sun }; // For compatibility with existing animation loop
+  
+  // Set initial camera position
+  const sunPos = new THREE.Vector3();
+  sun.getWorldPosition(sunPos);
+  
+  // Position camera at a good distance from Sun
+  camera.position.set(sunPos.x + 25, sunPos.y + 12, sunPos.z + 25);
+  controls.target.copy(sunPos);
+  
+  // Enable zoom controls for Sun following
+  controls.enableZoom = true;
+  controls.minDistance = 10;  // Minimum zoom distance
+  controls.maxDistance = 100; // Maximum zoom distance
+  
+  // Reset follow offset tracking
+  lastPlanetPosition.set(0, 0, 0);
+  userCameraOffset.set(0, 0, 0);
+  
+  // Update stop follow button
+  const stopFollowBtn = document.getElementById('stopFollowBtn');
+  if (stopFollowBtn) {
+    stopFollowBtn.style.display = 'block';
+    stopFollowBtn.classList.add('active');
+  }
+  
+  console.log('Now following the Sun (zoom enabled)');
+}
+
+// Stop following planet function
+function stopFollowingPlanet() {
+  followingPlanet = null;
+  followingTarget = null;
+  followingType = null;
+  lastPlanetPosition.set(0, 0, 0);
+  userCameraOffset.set(0, 0, 0);
+  
+  // Reset camera position like pressing R key
+  camera.position.set(0, 30, 70);
+  controls.target.set(0, 0, 0);
+  controls.reset();
+  
+  // Reset zoom controls to default
+  controls.enableZoom = true;
+  controls.minDistance = 0.1;
+  controls.maxDistance = 1000;
+  
+  // Hide planet info card
+  hidePlanetInfoCard();
+  
+  // Update button states
+  const followBtn = document.getElementById('followPlanetBtn');
+  const stopFollowBtn = document.getElementById('stopFollowBtn');
+  
+  if (followBtn) {
+    followBtn.textContent = '🎯 FOLLOW PLANET';
+    followBtn.classList.remove('following');
+  }
+  
+  if (stopFollowBtn) {
+    stopFollowBtn.style.display = 'none';
+    stopFollowBtn.classList.remove('active');
+  }
+  
+  console.log('Stopped following and reset view');
+}
+
+function hidePlanetInfoCard() {
+  const card = document.getElementById('planetInfoCard');
+  card.style.display = 'none';
+}
+
+// Enhanced planet interaction
 function onMouseClick(event) {
-  if (event.target.closest('.controls') || event.target.closest('.celestial-panel') || event.target.closest('.info')) {
+  if (event.target.closest('.controls') || 
+      event.target.closest('.celestial-panel') || 
+      event.target.closest('.info') ||
+      event.target.closest('.planet-info-card')) {
     return;
   }
   
@@ -2160,48 +2448,116 @@ function onMouseClick(event) {
   
   raycaster.setFromCamera(mouse, camera);
   
+  // Collect all clickable objects
+  let clickableObjects = [];
+  
+  // Add planet meshes
   const planetMeshObjects = planetMeshes.map(p => p.mesh);
-  const intersects = raycaster.intersectObjects(planetMeshObjects);
+  clickableObjects = clickableObjects.concat(planetMeshObjects);
+  
+  // Do NOT add moon meshes to clickableObjects, so moons are not clickable
+  let moonMeshes = [];
+  planetMeshes.forEach((planetObj, planetIndex) => {
+    if (planetObj.moons && planetObj.moons.length > 0) {
+      planetObj.moons.forEach(moon => {
+        moonMeshes.push({
+          mesh: moon.mesh,
+          moonData: moon,
+          planetIndex: planetIndex,
+          planetName: celestialBodies[planetIndex].name
+        });
+        // clickableObjects.push(moon.mesh); // DISABLED: moons not clickable
+      });
+    }
+  });
+  
+  // Add sun
+  clickableObjects.push(sun);
+  
+  const intersects = raycaster.intersectObjects(clickableObjects);
   
   if (intersects.length > 0) {
     const intersectedObject = intersects[0].object;
-    const planetIndex = planetMeshObjects.indexOf(intersectedObject);
     
+    // Check if it's the sun
+    if (intersectedObject === sun) {
+      followSun();
+      return;
+    }
+    
+    // Check if it's a moon (DISABLED: moons not clickable)
+    // const moonData = moonMeshes.find(m => m.mesh === intersectedObject);
+    // if (moonData) {
+    //   followMoon(moonData.mesh, moonData.moonData, moonData.planetName);
+    //   return;
+    // }
+    
+    // Check if it's a planet
+    const planetIndex = planetMeshObjects.indexOf(intersectedObject);
     if (planetIndex !== -1) {
       const body = celestialBodies[planetIndex];
-      const planet = planetMeshes[planetIndex];
       
-      followingPlanet = planet;
-      const distance = Math.max(body.size * 8, 15);
-      followOffset.set(distance, distance * 0.5, distance);
-      lastPlanetPosition.set(0, 0, 0);
-      userCameraOffset.set(0, 0, 0);
-      
-      const moonInfo = body.moons && body.moons.length > 0 ? 
-        `\n🌙 Moons: ${body.moons.length}` : '\n🌙 Moons: None';
-      
-      alert(`🌟 Now following: ${body.name}\n\n` +
-            `📂 Type: ${body.type === 'dwarf' ? 'Dwarf Planet' : 
-                      body.type === 'planet' ? 'Planet' : 
-                      body.type === 'asteroid' ? 'Major Asteroid' : 
-                      'Trans-Neptunian Object'}\n` +
-            `📏 Distance: ${body.dist} AU\n` +
-            `🗓️ Discovery: ${body.discoveryYear}${moonInfo}\n\n` +
-            `ℹ️ ${body.info}\n\n` +
-            `✨ Enhanced Features:\n` +
-            `• Glowing orbit rings for visibility\n` +
-            `• Color-coded by object type\n` +
-            `• Pulsing effect for distant objects\n\n` +
-            `🎮 Controls:\n` +
-            `• Mouse: Orbit around object\n` +
-            `• Scroll: Zoom in/out\n` +
-            `• R key or Reset: Stop following\n` +
-            `• O key: Toggle glowing orbits`);
+      // Show information card
+      showPlanetInfoCard(body, planetIndex);
     }
+  } else {
+    // Hide info card if clicking on empty space
+    hidePlanetInfoCard();
   }
 }
 
+// Raycaster for planet clicking
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
 window.addEventListener('click', onMouseClick);
+
+// Add event listener for closing planet info card
+document.getElementById('closePlanetInfo').addEventListener('click', hidePlanetInfoCard);
+
+// Add event listener for follow planet button
+document.getElementById('followPlanetBtn').addEventListener('click', () => {
+  if (currentPlanetIndex !== null) {
+    if (followingTarget === planetMeshes[currentPlanetIndex] && followingType === 'planet') {
+      stopFollowingPlanet();
+    } else {
+      followPlanet(currentPlanetIndex);
+    }
+  }
+});
+
+// Add event listener for stop follow button in control panel
+const stopFollowBtn = document.getElementById('stopFollowBtn');
+if (stopFollowBtn) {
+  stopFollowBtn.addEventListener('click', () => {
+    stopFollowingPlanet();
+  });
+}
+
+// Add event listener for follow sun button
+const followSunBtn = document.getElementById('followSunBtn');
+if (followSunBtn) {
+  followSunBtn.addEventListener('click', () => {
+    followSun();
+  });
+}
+
+// Update planet list click handlers to also show info card
+document.addEventListener('DOMContentLoaded', () => {
+  const originalPlanetItemHandler = planetItem => {
+    const originalHandler = planetItem.onclick;
+    planetItem.onclick = function(event) {
+      if (originalHandler) originalHandler.call(this, event);
+      
+      // Find the planet index from the element
+      const planetName = this.querySelector('strong').textContent;
+      const planetIndex = celestialBodies.findIndex(body => body.name === planetName);
+      if (planetIndex !== -1) {
+        showPlanetInfoCard(celestialBodies[planetIndex], planetIndex);
+      }
+    };
+  };
+});
 
 // Keyboard shortcuts
 window.addEventListener('keydown', (event) => {
@@ -2216,9 +2572,7 @@ window.addEventListener('keydown', (event) => {
       if (resetBtn) resetBtn.click();
       break;
     case 'f': // F to stop following planet
-      followingPlanet = null;
-      lastPlanetPosition.set(0, 0, 0);
-      userCameraOffset.set(0, 0, 0);
+      stopFollowingPlanet();
       break;
     case 'o': // O to toggle orbits
       const orbitsBtn = document.getElementById('orbitsBtn');
