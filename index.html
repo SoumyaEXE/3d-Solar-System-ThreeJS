@@ -118,6 +118,42 @@
       letter-spacing: 0.5px;
       transition: all 0.3s ease;
     }
+
+    .follow-planet-btn {
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
+      border: 2px solid var(--star-gold);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(255, 214, 10, 0.3);
+    }
+
+    .follow-planet-btn:hover {
+      background: linear-gradient(135deg, #ffa000, var(--star-gold));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 214, 10, 0.5);
+    }
+
+    .follow-planet-btn.following {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      color: var(--nasa-white);
+      border-color: var(--nasa-red);
+      box-shadow: 0 4px 15px rgba(252, 61, 33, 0.3);
+    }
+
+    .follow-planet-btn.following:hover {
+      background: linear-gradient(135deg, #d32f2f, var(--nasa-red));
+      box-shadow: 0 6px 20px rgba(252, 61, 33, 0.5);
+    }
     
     .control-group button:hover {
       background: var(--button-hover);
@@ -500,6 +536,323 @@
       transform: scale(1.05);
     }
 
+    /* Planet Information Card */
+    .planet-info-card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, var(--panel-bg), rgba(11, 61, 145, 0.95));
+      color: var(--nasa-white);
+      border-radius: 12px;
+      border: 2px solid var(--panel-border);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(11, 61, 145, 0.4);
+      min-width: 400px;
+      max-width: 500px;
+      max-height: 80vh;
+      z-index: 2000;
+      font-family: 'Titillium Web', sans-serif;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .planet-info-header {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      padding: 15px 20px;
+      border-radius: 10px 10px 0 0;
+      border-bottom: 2px solid var(--panel-border);
+      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 2001;
+    }
+
+    .planet-info-title {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--nasa-white);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .planet-type-badge {
+      background: rgba(255, 214, 10, 0.9);
+      color: var(--nasa-black);
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--nasa-white);
+      font-size: 24px;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .planet-info-content {
+      padding: 20px;
+      max-height: calc(80vh - 80px);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Custom scrollbar for planet info card */
+    .planet-info-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .planet-info-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .planet-info-content::-webkit-scrollbar-thumb {
+      background: var(--star-gold);
+      border-radius: 2px;
+    }
+
+    .info-section {
+      margin-bottom: 20px;
+    }
+
+    .info-section h4 {
+      margin: 0 0 10px 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--star-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 5px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .info-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 214, 10, 0.2);
+    }
+
+    .info-item-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--star-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .info-item-value {
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--nasa-white);
+    }
+
+    .planet-description {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid var(--star-gold);
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--nasa-gray);
+      margin-bottom: 15px;
+    }
+
+    .moons-section {
+      background: rgba(0, 29, 61, 0.6);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .moon-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: 'Titillium Web', sans-serif;
+    }
+
+    .moon-item:last-child {
+      border-bottom: none;
+    }
+
+    .moon-info-section {
+      flex: 1;
+    }
+
+    .moon-name {
+      font-weight: 600;
+      color: var(--nasa-white);
+      font-size: 13px;
+    }
+
+    .moon-info {
+      font-size: 11px;
+      color: var(--nasa-gray);
+      text-align: left;
+    }
+
+    .moon-follow-btn {
+      margin-left: 10px;
+    }
+
+    .follow-moon-btn {
+      background: linear-gradient(135deg, var(--comet-blue), #3498db);
+      color: var(--nasa-white);
+      border: 1px solid var(--comet-blue);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Titillium Web', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .follow-moon-btn:hover {
+      background: linear-gradient(135deg, #3498db, var(--comet-blue));
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(76, 201, 240, 0.3);
+    }
+
+    .follow-sun-btn {
+      background: linear-gradient(135deg, var(--asteroid-orange), #ff6b35);
+      color: var(--nasa-white);
+      border: 1px solid var(--asteroid-orange);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .follow-sun-btn:hover {
+      background: linear-gradient(135deg, #ff6b35, var(--asteroid-orange));
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(247, 127, 0, 0.4);
+    }
+
+    .orbital-period-display {
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .orbital-period-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--star-gold);
+    }
+
+    .orbital-period-label {
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 11px;
+      color: var(--nasa-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controls-info {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 214, 10, 0.2);
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: 'Titillium Web', sans-serif;
+    }
+
+    .control-item:last-child {
+      border-bottom: none;
+    }
+
+    .control-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .control-text {
+      font-size: 13px;
+      color: var(--nasa-gray);
+      line-height: 1.4;
+    }
+
+    .control-text strong {
+      color: var(--nasa-white);
+      font-weight: 600;
+    }
+
     /* NASA-styled Footer */
     .nasa-footer {
       position: fixed;
@@ -564,6 +917,11 @@
         <button id="resetBtn">Reset</button>
         <button id="hideUIBtn">Hide UI</button>
       </div>
+
+      <div class="control-group">
+        <label>Camera Control</label>
+        <button id="stopFollowBtn" style="display: none;" class="active">🛑 Stop Follow</button>
+      </div>
       
       <div class="control-group">
         <label>Atmosphere</label>
@@ -602,6 +960,7 @@
     ✨ Glowing Orbit Rings<br>
     🎵 Atmospheric Music<br>
     🛰️ Real-time NASA Data<br>
+    <button id="followSunBtn" class="follow-sun-btn">☀️ Follow Sun</button>
   </div>
   
   <div class="celestial-panel collapsed" id="celestialPanel">
@@ -617,10 +976,93 @@
     </div>
   </div>
   
+  <!-- Planet Information Card -->
+  <div id="planetInfoCard" class="planet-info-card">
+    <div class="planet-info-header">
+      <h2 class="planet-info-title">
+        <span id="planetIcon">🪐</span>
+        <span id="planetName">SATURN</span>
+        <span id="planetTypeBadge" class="planet-type-badge">PLANET</span>
+      </h2>
+      <button class="close-btn" id="closePlanetInfo">×</button>
+    </div>
+    <div class="planet-info-content">
+      <div class="info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-item-label">Orbital Period</div>
+            <div class="info-item-value" id="orbitalPeriod">29 years</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Size (Relative to Earth)</div>
+            <div class="info-item-value" id="sizeRelative">1.7x Earth</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Distance from Sun</div>
+            <div class="info-item-value" id="distanceFromSun">31 AU</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Discovery Year</div>
+            <div class="info-item-value" id="discoveryYear">Ancient</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="planet-description" id="planetDescription">
+          Famous for its prominent ring system. Less dense than water. Has 146 known moons.
+        </div>
+      </div>
+
+      <div class="info-section" id="moonsSection">
+        <h4>🌙 Moons (<span id="moonCount">9</span>)</h4>
+        <div class="moons-section" id="moonsContainer">
+          <!-- Moon items will be populated dynamically -->
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h4>🎮 Controls</h4>
+        <div class="controls-info">
+          <div class="control-item">
+            <div class="control-icon">🖱️</div>
+            <div class="control-text">
+              <strong>Mouse:</strong> Orbit around object
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="control-icon">🔄</div>
+            <div class="control-text">
+              <strong>Scroll:</strong> Zoom in/out
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="control-icon">⌨️</div>
+            <div class="control-text">
+              <strong>R key or Reset:</strong> Stop following
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="control-icon">💫</div>
+            <div class="control-text">
+              <strong>O key:</strong> Toggle glowing orbits
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <button id="followPlanetBtn" class="follow-planet-btn">
+          🎯 FOLLOW PLANET
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="nasa-footer">
     <div class="footer-content">
-      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya</a> & Copilot 2025
+      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya and Subarna</a> & Copilot 2025
     </div>
   </footer>
   
