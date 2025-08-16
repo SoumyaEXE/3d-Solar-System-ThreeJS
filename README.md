@@ -1,4 +1,4 @@
-# 3D Solar System 🌌
+# 3D Solar System Using Three.js and Github Co-Pilot🌌
 
 A visually interactive 3D Solar System simulation built with [Three.js](https://threejs.org/) and [Vite](https://vitejs.dev/). Explore the planets, their orbits, and the beauty of our solar neighborhood—all in your browser!
 
