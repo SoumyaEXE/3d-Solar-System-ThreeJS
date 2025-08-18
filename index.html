@@ -451,6 +451,11 @@
       border-radius: 2px;
     }
 
+    /* Special Events Panel - positioned below Mission Control */
+    #specialEventsControls {
+      top: 390px; /* Position below Mission Control panel */
+    }
+
     /* UI Hide/Show functionality */
     .ui-hidden {
       opacity: 0;
@@ -793,6 +798,125 @@
       box-shadow: 0 3px 10px rgba(247, 127, 0, 0.4);
     }
 
+    .eclipse-tour-btn {
+      background: linear-gradient(135deg, #1a1a1a, #333333);
+      color: var(--nasa-white);
+      border: 1px solid #444444;
+      padding: 3px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .eclipse-tour-btn:hover {
+      background: linear-gradient(135deg, #333333, #1a1a1a);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .eclipse-tour-btn.active {
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      border-color: #ff4444;
+      box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+    }
+
+    /* Tour button styling for Special Events panel */
+    .tour-btn {
+      background: linear-gradient(135deg, #1a1a1a, #333333);
+      color: var(--nasa-white);
+      border: 1px solid #444444;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tour-btn:hover {
+      background: linear-gradient(135deg, #333333, #1a1a1a);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .tour-btn.active {
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      border-color: #ff4444;
+      box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+    }
+
+    .eclipse-tour-info {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.75), rgba(10, 10, 30, 0.6));
+  border: 1px solid rgba(255,214,10,0.12);
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: left;
+  z-index: 1000;
+  width: min(1100px, 92%);
+  max-width: 1100px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    }
+
+    .eclipse-info-content h3 {
+      font-family: 'Orbitron', monospace;
+      color: var(--star-gold);
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      text-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+    }
+
+    .eclipse-phase-title {
+      font-family: 'Orbitron', monospace;
+      color: var(--nasa-white);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .eclipse-phase-desc {
+      font-family: 'Titillium Web', sans-serif;
+      color: var(--nasa-gray);
+      font-size: 14px;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    .eclipse-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .eclipse-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--star-gold), var(--nasa-red));
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+    }
+
     .orbital-period-display {
       background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
       padding: 10px;
@@ -921,8 +1045,11 @@
       <div class="control-group">
         <label>Camera Control</label>
         <button id="stopFollowBtn" style="display: none;" class="active">🛑 Stop Follow</button>
+
+        <button id="lunarEclipseTourBtn" class="eclipse-tour-btn">� Lunar Eclipse Tour</button>
       </div>
       
+
       <div class="control-group">
         <label>Atmosphere</label>
         <button id="musicBtn">🎵 Music</button>
@@ -946,6 +1073,24 @@
         <button id="trojansBtn" class="active">Trojans</button>
         <button id="kuiperBtn" class="active">Kuiper</button>
         <button id="scatteredBtn" class="active">Scattered</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Special Events Panel -->
+  <div class="controls collapsed" id="specialEventsControls">
+    <div class="control-header" onclick="toggleSpecialEventsPanel()">
+      <h3>Special Events <span class="control-toggle-icon">►</span></h3>
+    </div>
+    <div class="control-content">
+      <div class="control-group">
+        <h4 style="margin: 5px 0; color: var(--star-gold);">Eclipse Tours</h4>
+        <button id="solarEclipseTour" class="tour-btn" style="width: 100%; margin-bottom: 8px;">
+          🌑 Solar Eclipse Tour
+        </button>
+        <button id="lunarEclipseTour" class="tour-btn" style="width: 100%;">
+          🌙 Lunar Eclipse Tour
+        </button>
       </div>
     </div>
   </div>
@@ -1059,10 +1204,30 @@
     </div>
   </div>
 
+  <!-- Eclipse Tour Info Panel (bottom, stretched) -->
+  <div id="eclipseTourInfo" class="eclipse-tour-info" style="display: none;">
+    <div class="eclipse-info-content">
+      <div style="display:flex; gap:18px; align-items:flex-start;">
+        <div style="flex:0 0 72px; font-size:40px; line-height:1;">🌒</div>
+        <div style="flex:1 1 auto;">
+          <h3 style="margin:0 0 6px 0; font-size:20px;">Solar Eclipse: Cinematic Tour</h3>
+          <div id="eclipsePhaseTitle" class="eclipse-phase-title">Phase 1: Getting Ready</div>
+          <div id="eclipsePhaseDesc" class="eclipse-phase-desc" style="margin-top:6px;">We will slowly move in so you can clearly see how the Sun, Moon and Earth line up — this helps you understand why eclipses happen. The tour is slow on purpose so you can enjoy every moment.</div>
+        </div>
+        <div style="flex:0 0 220px; display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+          <div class="eclipse-progress-bar" style="width:200px;">
+            <div id="eclipseProgress" class="eclipse-progress-fill"></div>
+          </div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.75);">Sit back — the whole tour may take a minute or two. Be patient; it's designed to teach and look beautiful.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="nasa-footer">
     <div class="footer-content">
-      Made With 💙 By<a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">&nbsp;Soumya X <a href="https://github.com/Dronzer2Code" target="_blank" rel="noopener noreferrer">Subarna</a>
+      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya and Subarna</a> & Copilot 2025
     </div>
   </footer>
   
@@ -1105,6 +1270,20 @@
 
     function toggleControlPanel() {
       const panel = document.getElementById('uiControls');
+      const icon = panel.querySelector('.control-toggle-icon');
+      
+      panel.classList.toggle('collapsed');
+      
+      // Update icon based on state
+      if (panel.classList.contains('collapsed')) {
+        icon.textContent = '►';
+      } else {
+        icon.textContent = '▼';
+      }
+    }
+
+    function toggleSpecialEventsPanel() {
+      const panel = document.getElementById('specialEventsControls');
       const icon = panel.querySelector('.control-toggle-icon');
       
       panel.classList.toggle('collapsed');
