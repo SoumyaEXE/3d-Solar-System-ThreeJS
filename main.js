@@ -6,6 +6,13 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { Lensflare, LensflareElement } from "three/examples/jsm/objects/Lensflare.js";
 
+// Import i18n functionality
+import { getCurrentLanguage, setLanguage, t, formatTimePeriod } from './i18n/index.js';
+
+// Global variable to track current language
+let currentLanguage = getCurrentLanguage();
+
+
 // NASA API Key for real-time planet data
 const NASA_API_KEY = "CH3TuB34hg317ulEggcZCMlKgCCPYQeTzdzJDNCz";
 
@@ -261,7 +268,7 @@ async function fetchFamousAsteroids() {
     try {
       const orb = await fetchAsteroidOrbitalElements(asteroid);
       if (orb) {
-        asteroidData.push({ name: asteroid, orb: orb });
+        asteroidData.push({ nameKey: asteroid, orb: orb });
       }
       // Add delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -298,7 +305,7 @@ async function addRealAsteroids() {
       );
       
       mesh.position.set(pos.x * AU_TO_SCENE, pos.y * AU_TO_SCENE, pos.z * AU_TO_SCENE);
-      mesh.userData = { type: 'famous', name: data.name, data: data };
+      mesh.userData = { type: 'famous', nameKey: data.name, data: data };
       scene.add(mesh);
       famousAsteroids.push(mesh);
       
@@ -830,7 +837,7 @@ createOortCloud();
 // Planets and Dwarf Planets
 const celestialBodies = [
   {
-    name: "Mercury",
+    nameKey: 'planets.mercury.name',
     size: 0.5,
     dist: 8,
     speed: 0.0041,
@@ -839,12 +846,12 @@ const celestialBodies = [
     roughness: 1, 
     metalness: 0.02,
     type: "planet",
-    info: "Closest planet to the Sun. Surface temperatures range from -173°C to 427°C. Has no atmosphere and no moons.",
+    infoKey: 'planets.mercury.info',
     discoveryYear: "Ancient",
     moons: []
   },
   {
-    name: "Venus",
+    nameKey: 'planets.venus.name',
     size: 0.9,
     dist: 11,
     speed: 0.0016,
@@ -853,12 +860,12 @@ const celestialBodies = [
     roughness: 0.6,
     metalness: 0.05,
     type: "planet",
-    info: "Hottest planet in our solar system with surface temperatures of 462°C. Has a thick, toxic atmosphere of carbon dioxide.",
+    infoKey: 'planets.venus.info',
     discoveryYear: "Ancient",
     moons: []
   },
   {
-    name: "Earth",
+    nameKey: 'planets.earth.name',
     size: 1,
     dist: 15,
     speed: 0.001,
@@ -867,14 +874,14 @@ const celestialBodies = [
     roughness: 0.5, 
     metalness: 0.01,
     type: "planet",
-    info: "The only known planet with life. 71% of surface covered by water. Has one natural satellite.",
+    infoKey: 'planets.earth.info',
     discoveryYear: "N/A",
     moons: [
-      { name: "Moon", size: 0.27, dist: 2.5, speed: 0.037, color: new THREE.Color(0.53, 0.53, 0.53), info: "Earth's only natural satellite. Formed 4.5 billion years ago.", initialAngle: 1.2 }
+      { nameKey: 'moons.moon.name', size: 0.27, dist: 2.5, speed: 0.037, color: new THREE.Color(0.53, 0.53, 0.53), infoKey: 'moons.moon.info', initialAngle: 1.2 }
     ]
   },
   {
-    name: "Mars",
+    nameKey: 'planets.mars.name',
     size: 0.8,
     dist: 19,
     speed: 0.00053,
@@ -883,15 +890,15 @@ const celestialBodies = [
     roughness: 0.75,
     metalness: 0.02,
     type: "planet",
-    info: "The Red Planet. Has the largest volcano (Olympus Mons) and canyon (Valles Marineris) in the solar system.",
+    infoKey: 'planets.mars.info',
     discoveryYear: "Ancient",
     moons: [
-      { name: "Phobos", size: 0.05, dist: 1.5, speed: 0.32, color: new THREE.Color(0.4, 0.26, 0.13), info: "Largest moon of Mars. Orbits Mars 3 times per day.", initialAngle: 0.5 },
-      { name: "Deimos", size: 0.03, dist: 2.2, speed: 0.08, color: new THREE.Color(0.4, 0.26, 0.13), info: "Smaller, outer moon of Mars. Takes 30 hours to orbit Mars.", initialAngle: 2.1 }
+      { nameKey: 'moons.phobos.name', size: 0.05, dist: 1.5, speed: 0.32, color: new THREE.Color(0.4, 0.26, 0.13), infoKey: 'moons.phobos.info', initialAngle: 0.5 },
+      { nameKey: 'moons.deimos.name', size: 0.03, dist: 2.2, speed: 0.08, color: new THREE.Color(0.4, 0.26, 0.13), infoKey: 'moons.deimos.info', initialAngle: 2.1 }
     ]
   },
   {
-    name: "Vesta",
+    nameKey: 'planets.vesta.name',
     size: 0.15,
     dist: 20.5,
     speed: 0.00029,
@@ -900,12 +907,12 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.1,
     type: "asteroid",
-    info: "Second-largest asteroid. Has a differentiated interior with basaltic surface. Visited by Dawn spacecraft.",
+    infoKey: 'planets.vesta.info',
     discoveryYear: "1807",
     moons: []
   },
   {
-    name: "Pallas",
+    nameKey: 'planets.pallas.name',
     size: 0.12,
     dist: 21.2,
     speed: 0.00022,
@@ -914,12 +921,12 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.05,
     type: "asteroid",
-    info: "Third-largest asteroid. Highly inclined orbit. Possibly a protoplanet.",
+    infoKey: 'planets.pallas.info',
     discoveryYear: "1802",
     moons: []
   },
   {
-    name: "Jupiter",
+    nameKey: 'planets.jupiter.name',
     size: 2,
     dist: 25,
     speed: 0.000084,
@@ -928,21 +935,21 @@ const celestialBodies = [
     roughness: 0.9,
     metalness: 0.0,
     type: "planet",
-    info: "Largest planet in our solar system. Great Red Spot is a storm larger than Earth. Has 95 known moons.",
+    infoKey: 'planets.jupiter.info',
     discoveryYear: "Ancient",
     moons: [
-      { name: "Io", size: 0.15, dist: 3.5, speed: 0.56, color: new THREE.Color(1.0, 1.0, 0.6), info: "Most volcanically active body in the solar system.", initialAngle: 0.8 },
-      { name: "Europa", size: 0.13, dist: 4.2, speed: 0.28, color: new THREE.Color(0.53, 0.81, 0.92), info: "Ice-covered moon with subsurface ocean. Potential for life.", initialAngle: 1.5 },
-      { name: "Ganymede", size: 0.22, dist: 5.1, speed: 0.14, color: new THREE.Color(0.55, 0.49, 0.42), info: "Largest moon in the solar system. Has its own magnetic field.", initialAngle: 3.2 },
-      { name: "Callisto", size: 0.20, dist: 6.0, speed: 0.06, color: new THREE.Color(0.41, 0.41, 0.41), info: "Most heavily cratered body in the solar system.", initialAngle: 4.9 },
-      { name: "Amalthea", size: 0.08, dist: 2.8, speed: 2.0, color: new THREE.Color(0.6, 0.4, 0.2), info: "Fifth largest moon of Jupiter. Irregular potato shape.", initialAngle: 5.2 },
-      { name: "Himalia", size: 0.05, dist: 7.5, speed: 0.013, color: new THREE.Color(0.5, 0.5, 0.5), info: "Largest irregular moon of Jupiter.", initialAngle: 2.1 },
-      { name: "Lysithea", size: 0.02, dist: 8.2, speed: 0.010, color: new THREE.Color(0.4, 0.4, 0.4), info: "Small irregular moon in Jupiter's prograde group.", initialAngle: 4.7 },
-      { name: "Elara", size: 0.03, dist: 8.0, speed: 0.011, color: new THREE.Color(0.45, 0.45, 0.45), info: "Irregular moon discovered in 1905.", initialAngle: 1.8 }
+      { nameKey: 'moons.io.name', size: 0.15, dist: 3.5, speed: 0.56, color: new THREE.Color(1.0, 1.0, 0.6), infoKey: 'moons.io.info', initialAngle: 0.8 },
+      { nameKey: 'moons.europa.name', size: 0.13, dist: 4.2, speed: 0.28, color: new THREE.Color(0.53, 0.81, 0.92), infoKey: 'moons.europa.info', initialAngle: 1.5 },
+      { nameKey: 'moons.ganymede.name', size: 0.22, dist: 5.1, speed: 0.14, color: new THREE.Color(0.55, 0.49, 0.42), infoKey: 'moons.ganymede.info', initialAngle: 3.2 },
+      { nameKey: 'moons.callisto.name', size: 0.20, dist: 6.0, speed: 0.06, color: new THREE.Color(0.41, 0.41, 0.41), infoKey: 'moons.callisto.info', initialAngle: 4.9 },
+      { nameKey: 'moons.amalthea.name', size: 0.08, dist: 2.8, speed: 2.0, color: new THREE.Color(0.6, 0.4, 0.2), infoKey: 'moons.amalthea.info', initialAngle: 5.2 },
+      { nameKey: 'moons.himalia.name', size: 0.05, dist: 7.5, speed: 0.013, color: new THREE.Color(0.5, 0.5, 0.5), infoKey: 'moons.himalia.info', initialAngle: 2.1 },
+      { nameKey: 'moons.lysithea.name', size: 0.02, dist: 8.2, speed: 0.010, color: new THREE.Color(0.4, 0.4, 0.4), infoKey: 'moons.lysithea.info', initialAngle: 4.7 },
+      { nameKey: 'moons.elara.name', size: 0.03, dist: 8.0, speed: 0.011, color: new THREE.Color(0.45, 0.45, 0.45), infoKey: 'moons.elara.name', initialAngle: 1.8 }
     ]
   },
   {
-    name: "Saturn",
+    nameKey: 'planets.saturn.name',
     size: 1.7,
     dist: 31,
     speed: 0.000034,
@@ -952,22 +959,22 @@ const celestialBodies = [
     roughness: 0.9,
     metalness: 0.0,
     type: "planet",
-    info: "Famous for its prominent ring system. Less dense than water. Has 146 known moons.",
+    infoKey: 'planets.saturn.info',
     discoveryYear: "Ancient",
     moons: [
-      { name: "Mimas", size: 0.06, dist: 2.8, speed: 1.05, color: new THREE.Color(0.7, 0.7, 0.7), info: "Death Star-like appearance with giant Herschel crater.", initialAngle: 0.9 },
-      { name: "Enceladus", size: 0.08, dist: 3.2, speed: 0.73, color: new THREE.Color(0.94, 0.97, 1.0), info: "Ice geysers from south pole. Subsurface ocean.", initialAngle: 4.1 },
-      { name: "Tethys", size: 0.09, dist: 3.7, speed: 0.52, color: new THREE.Color(0.8, 0.8, 0.85), info: "Heavily cratered icy moon with large Odysseus crater.", initialAngle: 2.7 },
-      { name: "Dione", size: 0.09, dist: 4.1, speed: 0.37, color: new THREE.Color(0.75, 0.75, 0.8), info: "Ice cliffs and wispy terrain on trailing hemisphere.", initialAngle: 5.5 },
-      { name: "Rhea", size: 0.12, dist: 4.8, speed: 0.22, color: new THREE.Color(0.7, 0.7, 0.75), info: "Second largest moon of Saturn with thin oxygen atmosphere.", initialAngle: 1.3 },
-      { name: "Titan", size: 0.21, dist: 5.5, speed: 0.063, color: new THREE.Color(1.0, 0.65, 0.0), info: "Has thick atmosphere and liquid methane lakes.", initialAngle: 2.3 },
-      { name: "Hyperion", size: 0.04, dist: 6.2, speed: 0.048, color: new THREE.Color(0.6, 0.5, 0.4), info: "Chaotic rotation and sponge-like appearance.", initialAngle: 3.8 },
-      { name: "Iapetus", size: 0.11, dist: 7.0, speed: 0.014, color: new THREE.Color(0.3, 0.3, 0.3), info: "Two-tone coloration, dark leading hemisphere.", initialAngle: 0.5 },
-      { name: "Phoebe", size: 0.03, dist: 8.5, speed: 0.006, color: new THREE.Color(0.25, 0.25, 0.25), info: "Retrograde irregular moon, likely captured asteroid.", initialAngle: 4.9 }
+      { nameKey: 'moons.mimas.name', size: 0.06, dist: 2.8, speed: 1.05, color: new THREE.Color(0.7, 0.7, 0.7), infoKey: 'moons.mimas.info', initialAngle: 0.9 },
+      { nameKey: 'moons.enceladus.name', size: 0.08, dist: 3.2, speed: 0.73, color: new THREE.Color(0.94, 0.97, 1.0), infoKey: 'moons.enceladus.info', initialAngle: 4.1 },
+      { nameKey: 'moons.tethys.name', size: 0.09, dist: 3.7, speed: 0.52, color: new THREE.Color(0.8, 0.8, 0.85), infoKey: 'moons.thetys.info', initialAngle: 2.7 },
+      { nameKey: 'moons.dione.name', size: 0.09, dist: 4.1, speed: 0.37, color: new THREE.Color(0.75, 0.75, 0.8), infoKey: 'moons.dione.info', initialAngle: 5.5 },
+      { nameKey: 'moons.rhea.name', size: 0.12, dist: 4.8, speed: 0.22, color: new THREE.Color(0.7, 0.7, 0.75), infoKey: 'moons.rhea.info', initialAngle: 1.3 },
+      { nameKey: 'moons.titan.name', size: 0.21, dist: 5.5, speed: 0.063, color: new THREE.Color(1.0, 0.65, 0.0), infoKey: 'moons.titan.info', initialAngle: 2.3 },
+      { nameKey: 'moons.hyperion.name', size: 0.04, dist: 6.2, speed: 0.048, color: new THREE.Color(0.6, 0.5, 0.4), infoKey: 'moons.hyperion.info', initialAngle: 3.8 },
+      { nameKey: 'moons.iapetus.name', size: 0.11, dist: 7.0, speed: 0.014, color: new THREE.Color(0.3, 0.3, 0.3), infoKey: 'moons.iapetus.info', initialAngle: 0.5 },
+      { nameKey: 'moons.phoebe.name', size: 0.03, dist: 8.5, speed: 0.006, color: new THREE.Color(0.25, 0.25, 0.25), infoKey: 'moons.phoebe.info', initialAngle: 4.9 }
     ]
   },
   {
-    name: "Uranus",
+    nameKey: 'planets.uranus.name',
     size: 1.2,
     dist: 37,
     speed: 0.000012,
@@ -976,19 +983,20 @@ const celestialBodies = [
     roughness: 0.85,
     metalness: 0.0,
     type: "planet",
-    info: "Ice giant tilted on its side (98° axial tilt). Has faint rings and 28 known moons.",
+    infoKey: 'planets.uranus.info',
     discoveryYear: "1781",
     moons: [
-      { name: "Ariel", size: 0.08, dist: 2.2, speed: 0.39, color: new THREE.Color(0.6, 0.6, 0.65), info: "Youngest surface among Uranian moons with fault valleys.", initialAngle: 2.1 },
-      { name: "Umbriel", size: 0.08, dist: 2.5, speed: 0.23, color: new THREE.Color(0.4, 0.4, 0.45), info: "Darkest of Uranus's major moons.", initialAngle: 4.8 },
-      { name: "Titania", size: 0.11, dist: 3.0, speed: 0.12, color: new THREE.Color(0.55, 0.55, 0.6), info: "Largest moon of Uranus with deep canyons.", initialAngle: 1.7 },
-      { name: "Oberon", size: 0.10, dist: 3.4, speed: 0.075, color: new THREE.Color(0.5, 0.5, 0.55), info: "Outermost major moon with ancient cratered surface.", initialAngle: 5.3 },
-      { name: "Miranda", size: 0.06, dist: 1.8, speed: 0.67, color: new THREE.Color(0.53, 0.53, 0.53), info: "Most unusual moon with extreme geological features.", initialAngle: 3.7 },
-      { name: "Puck", size: 0.03, dist: 1.5, speed: 1.18, color: new THREE.Color(0.45, 0.45, 0.5), info: "Small irregular moon discovered by Voyager 2.", initialAngle: 0.8 }
-    ]
+      { nameKey: 'moons.ariel.name', size: 0.08, dist: 2.2, speed: 0.39, color: new THREE.Color(0.6, 0.6, 0.65), infoKey: 'moons.ariel.info', initialAngle: 2.1 },
+      { nameKey: 'moons.umbriel.name', size: 0.08, dist: 2.5, speed: 0.23, color: new THREE.Color(0.4, 0.4, 0.45), infoKey: 'moons.umbriel.info', initialAngle: 4.8 },
+      { nameKey: 'moons.titania.name', size: 0.11, dist: 3.0, speed: 0.12, color: new THREE.Color(0.55, 0.55, 0.6), infoKey: 'moons.titania.info', initialAngle: 1.7 },
+      { nameKey: 'moons.oberon.name', size: 0.10, dist: 3.4, speed: 0.075, color: new THREE.Color(0.5, 0.5, 0.55), infoKey: 'moons.oberon.info', initialAngle: 5.3 },
+      { nameKey: 'moons.miranda.name', size: 0.06, dist: 1.8, speed: 0.67, color: new THREE.Color(0.53, 0.53, 0.53), infoKey: 'moons.miranda.info', initialAngle: 3.7 },
+      { nameKey: 'moons.puck.name', size: 0.03, dist: 1.5, speed: 1.18, color: new THREE.Color(0.45, 0.45, 0.5), infoKey: 'moons.puck.info', initialAngle: 0.8 }
+    ],
+     rotationDirection: -1
   },
   {
-    name: "Neptune",
+    nameKey: 'planets.neptune.name',
     size: 1.1,
     dist: 42,
     speed: 0.0000061,
@@ -997,17 +1005,17 @@ const celestialBodies = [
     roughness: 0.85,
     metalness: 0.0,
     type: "planet",
-    info: "Windiest planet with speeds up to 2,100 km/h. Deep blue color from methane in atmosphere.",
+    infoKey: 'planets.neptune.info',
     discoveryYear: "1846",
     moons: [
-      { name: "Triton", size: 0.11, dist: 3.0, speed: 0.17, color: new THREE.Color(0.53, 0.81, 0.92), info: "Largest moon of Neptune. Orbits retrograde. Nitrogen geysers.", initialAngle: 0.9 },
-      { name: "Nereid", size: 0.02, dist: 4.8, speed: 0.003, color: new THREE.Color(0.5, 0.5, 0.5), info: "Highly eccentric orbit, likely captured Kuiper Belt object.", initialAngle: 3.2 },
-      { name: "Proteus", size: 0.03, dist: 2.2, speed: 0.89, color: new THREE.Color(0.4, 0.4, 0.4), info: "Largest irregular-shaped moon of Neptune.", initialAngle: 5.7 },
-      { name: "Larissa", size: 0.015, dist: 1.8, speed: 1.81, color: new THREE.Color(0.35, 0.35, 0.35), info: "Small inner moon discovered by Voyager 2.", initialAngle: 2.4 }
+      { nameKey: 'moons.triton.name', size: 0.11, dist: 3.0, speed: 0.17, color: new THREE.Color(0.53, 0.81, 0.92), infoKey: 'moons.triton.info', initialAngle: 0.9 },
+      { nameKey: 'moons.nereid.name', size: 0.02, dist: 4.8, speed: 0.003, color: new THREE.Color(0.5, 0.5, 0.5), infoKey: 'moons.nereid.info', initialAngle: 3.2 },
+      { nameKey: 'moons.proteus.name', size: 0.03, dist: 2.2, speed: 0.89, color: new THREE.Color(0.4, 0.4, 0.4), infoKey: 'moons.proteus.info', initialAngle: 5.7 },
+      { nameKey: 'moons.larissa.name', size: 0.015, dist: 1.8, speed: 1.81, color: new THREE.Color(0.35, 0.35, 0.35), infoKey: 'moons.larissa.info', initialAngle: 2.4 }
     ]
   },
   {
-    name: "Ceres",
+    nameKey: 'planets.ceres.name',
     size: 0.3,
     dist: 22,
     speed: 0.00022,
@@ -1015,12 +1023,12 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Largest object in asteroid belt. Has water ice and possible subsurface ocean. Visited by Dawn spacecraft.",
+    infoKey: 'planets.ceres.info',
     discoveryYear: "1801",
     moons: []
   },
   {
-    name: "Pluto",
+    nameKey: 'planets.pluto.name',
     size: 0.4,
     dist: 48,
     speed: 0.000004,
@@ -1029,14 +1037,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Former ninth planet. Has heart-shaped nitrogen plains. Binary system with Charon.",
+    infoKey: 'planets.pluto.info',
     discoveryYear: "1930",
     moons: [
-      { name: "Charon", size: 0.2, dist: 1.8, speed: 0.16, color: new THREE.Color(0.5, 0.5, 0.5), info: "Largest moon relative to its parent planet. Tidally locked to Pluto.", initialAngle: 1.8 }
+      { nameKey: 'moons.charon.name', size: 0.2, dist: 1.8, speed: 0.16, color: new THREE.Color(0.5, 0.5, 0.5), infoKey: 'moons.charon.info', initialAngle: 1.8 }
     ]
   },
   {
-    name: "Eris",
+    nameKey: 'planets.eris.name',
     size: 0.35,
     dist: 52,
     speed: 0.0000018,
@@ -1045,14 +1053,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Most massive dwarf planet. Discovery led to Pluto's reclassification. Very reflective surface.",
+    infoKey: 'planets.eris.info',
     discoveryYear: "2005",
     moons: [
-      { name: "Dysnomia", size: 0.04, dist: 2.0, speed: 0.067, color: new THREE.Color(0.6, 0.6, 0.6), info: "Only known moon of Eris.", initialAngle: 4.5 }
+      { nameKey: 'moons.dysnomia.name', size: 0.04, dist: 2.0, speed: 0.067, color: new THREE.Color(0.6, 0.6, 0.6), infoKey: 'moons.dysnomia.info', initialAngle: 4.5 }
     ]
   },
   {
-    name: "Makemake",
+    nameKey: 'planets.makemake.name',
     size: 0.25,
     dist: 50,
     speed: 0.0000032,
@@ -1061,14 +1069,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Third-largest dwarf planet. Reddish surface likely due to organic compounds. No atmosphere.",
+    infoKey: 'planets.makemake.info',
     discoveryYear: "2005",
     moons: [
-      { name: "MK 2", size: 0.02, dist: 1.5, speed: 0.083, color: new THREE.Color(0.4, 0.4, 0.4), info: "Small, dark moon of Makemake.", initialAngle: 0.7 }
+      { nameKey: 'moons.mk2.name', size: 0.02, dist: 1.5, speed: 0.083, color: new THREE.Color(0.4, 0.4, 0.4), infoKey: 'moons.mk2.info', initialAngle: 0.7 }
     ]
   },
   {
-    name: "Haumea",
+    nameKey: 'planets.haumea.name',
     size: 0.28,
     dist: 51,
     speed: 0.0000035,
@@ -1077,15 +1085,15 @@ const celestialBodies = [
     roughness: 0.8,
     metalness: 0.1,
     type: "dwarf",
-    info: "Elongated dwarf planet that spins every 4 hours. Has ring system and crystalline water ice surface.",
+    infoKey: 'planets.haumea.info',
     discoveryYear: "2004",
     moons: [
-      { name: "Hi'iaka", size: 0.05, dist: 2.2, speed: 0.02, color: new THREE.Color(0.87, 0.87, 0.87), info: "Larger moon of Haumea.", initialAngle: 2.9 },
-      { name: "Namaka", size: 0.03, dist: 1.8, speed: 0.056, color: new THREE.Color(0.8, 0.8, 0.8), info: "Smaller, inner moon of Haumea.", initialAngle: 5.1 }
+      { nameKey: 'moons.hiiaka.name', size: 0.05, dist: 2.2, speed: 0.02, color: new THREE.Color(0.87, 0.87, 0.87), infoKey: 'moons.hiiaka.info', initialAngle: 2.9 },
+      { nameKey: 'moons.namaka.name', size: 0.03, dist: 1.8, speed: 0.056, color: new THREE.Color(0.8, 0.8, 0.8), infoKey: 'moons.namaka.info', initialAngle: 5.1 }
     ]
   },
   {
-    name: "Sedna",
+    nameKey: 'planets.sedna.name',
     size: 0.2,
     dist: 65,
     speed: 0.00000009,
@@ -1094,12 +1102,12 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Extremely distant object in extended scattered disk. Takes 11,400 years to orbit the Sun.",
+    infoKey: 'planets.sedna.info',
     discoveryYear: "2003",
     moons: []
   },
   {
-    name: "Quaoar",
+    nameKey: 'planets.quaoar.name',
     size: 0.18,
     dist: 54,
     speed: 0.0000035,
@@ -1108,14 +1116,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Classical Kuiper Belt object. Has ring system and one known moon.",
+    infoKey: 'planets.quaoar.info',
     discoveryYear: "2002",
     moons: [
-      { name: "Weywot", size: 0.02, dist: 1.6, speed: 0.083, color: new THREE.Color(0.33, 0.33, 0.33), info: "Moon of Quaoar.", initialAngle: 1.3 }
+      { nameKey: 'moons.weywot.name', size: 0.02, dist: 1.6, speed: 0.083, color: new THREE.Color(0.33, 0.33, 0.33), infoKey: 'moons.weywot.info', initialAngle: 1.3 }
     ]
   },
   {
-    name: "Orcus",
+    nameKey: 'planets.orcus.name',
     size: 0.16,
     dist: 49,
     speed: 0.000004,
@@ -1124,14 +1132,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Plutino in 2:3 resonance with Neptune. Sometimes called 'anti-Pluto'.",
+    infoKey: 'planets.orcus.info',
     discoveryYear: "2004",
     moons: [
-      { name: "Vanth", size: 0.06, dist: 1.9, speed: 0.1, color: new THREE.Color(0.27, 0.27, 0.27), info: "Large moon of Orcus.", initialAngle: 4.8 }
+      { nameKey: 'moons.vanth.info', size: 0.06, dist: 1.9, speed: 0.1, color: new THREE.Color(0.27, 0.27, 0.27), infoKey: 'moons.vanth.info', initialAngle: 4.8 }
     ]
   },
   {
-    name: "Gonggong",
+    nameKey: 'planets.gonggong.name',
     size: 0.19,
     dist: 56,
     speed: 0.0000018,
@@ -1140,14 +1148,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "Red-colored scattered disk object. Has slow rotation period of 22 hours.",
+    infoKey: 'planets.gonggong.info',
     discoveryYear: "2007",
     moons: [
-      { name: "Xiangliu", size: 0.03, dist: 1.7, speed: 0.1, color: new THREE.Color(0.4, 0.4, 0.4), info: "Moon of Gonggong.", initialAngle: 3.8 }
+      { nameKey: 'moons.xiangliu.info', size: 0.03, dist: 1.7, speed: 0.1, color: new THREE.Color(0.4, 0.4, 0.4), infoKey: 'moons.xiangliu.info', initialAngle: 3.8 }
     ]
   },
   {
-    name: "Varuna",
+    nameKey: 'planets.varuna.name',
     size: 0.12,
     dist: 53,
     speed: 0.0000027,
@@ -1156,12 +1164,12 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "tno",
-    info: "Large classical Kuiper Belt object. Elongated shape with rapid rotation.",
+    infoKey: 'planets.varuna.info',
     discoveryYear: "2000",
     moons: []
   },
   {
-    name: "Ixion",
+    nameKey: 'planets.ixion.name',
     size: 0.11,
     dist: 49.5,
     speed: 0.000004,
@@ -1170,12 +1178,12 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "tno",
-    info: "Plutino with very red surface. May have experienced thermal evolution.",
+    infoKey: 'planets.ixion.info',
     discoveryYear: "2001",
     moons: []
   },
   {
-    name: "Salacia",
+    nameKey: 'planets.salacia.name',
     size: 0.13,
     dist: 50.3,
     speed: 0.0000035,
@@ -1184,14 +1192,14 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "tno",
-    info: "Large trans-Neptunian object with a known moon.",
+    infoKey: 'planets.salacia.info',
     discoveryYear: "2004",
     moons: [
-      { name: "Actaea", size: 0.04, dist: 1.4, speed: 0.09, color: new THREE.Color(0.5, 0.5, 0.55), info: "Moon of Salacia, discovered in 2006.", initialAngle: 1.9 }
+      { nameKey: 'moons.actaea.name', size: 0.04, dist: 1.4, speed: 0.09, color: new THREE.Color(0.5, 0.5, 0.55), infoKey: 'moons.actaea.info', initialAngle: 1.9 }
     ]
   },
   {
-    name: "2007 OR10",
+    nameKey: 'planets.or10.name',
     size: 0.16,
     dist: 55.2,
     speed: 0.0000019,
@@ -1200,10 +1208,10 @@ const celestialBodies = [
     roughness: 1.0,
     metalness: 0.0,
     type: "dwarf",
-    info: "One of the largest known dwarf planets, very red in color.",
+    infoKey: 'planets.or10.info',
     discoveryYear: "2007",
     moons: [
-      { name: "S/2016 (225088) 1", size: 0.025, dist: 1.6, speed: 0.08, color: new THREE.Color(0.4, 0.4, 0.4), info: "Small moon of 2007 OR10.", initialAngle: 5.1 }
+      { nameKey: 'moons.s2016.name', size: 0.025, dist: 1.6, speed: 0.08, color: new THREE.Color(0.4, 0.4, 0.4), infoKey: 'moons.s2016.info', initialAngle: 5.1 }
     ]
   }
 ];
@@ -1468,7 +1476,10 @@ function createPlanetLabels() {
     const body = celestialBodies[index];
     const labelDiv = document.createElement('div');
     labelDiv.className = 'planet-label';
-    labelDiv.textContent = body.name;
+    // Use nameKey if available, otherwise use name
+    const bodyName = body.nameKey ? t(body.nameKey) : body.name;
+    labelDiv.textContent = bodyName;
+
     labelDiv.style.display = 'none';
     document.body.appendChild(labelDiv);
     
@@ -1515,7 +1526,10 @@ function createMoonLabels() {
       body.moons.forEach((moonData, moonIndex) => {
         const labelDiv = document.createElement('div');
         labelDiv.className = 'moon-label';
-        labelDiv.textContent = moonData.name;
+        // Use nameKey if available, otherwise use name
+        const moonName = moonData.nameKey ? t(moonData.nameKey) : moonData.name;
+        labelDiv.textContent = moonName;
+
         labelDiv.style.display = 'none';
         document.body.appendChild(labelDiv);
         
@@ -1698,22 +1712,36 @@ async function initializeRealObjects() {
 setTimeout(() => {
   animate();
   initializeRealObjects();
+   // Initialize UI after everything is set up
+  setTimeout(() => {
+    initializeUIWithLanguage();
+  }, 100);
 }, 200);
 
-// UI Controls (only if elements exist)
+// UI update functions with i18n
+function updateSpeedDisplay(speed) {
+  const speedValue = document.getElementById('speedValue');
+  if (speedValue) {
+    if (speed === 0) {
+      speedValue.textContent = t('ui.labels.realearthtime');
+    } else if (speed < 1) {
+      speedValue.textContent = speed.toFixed(1) + t('ui.labels.slowearthtime');
+    } else {
+      speedValue.textContent = speed.toFixed(1) + t('ui.labels.fastearthtime');
+    }
+  }
+}
+
+// UI Controls (updated with i18n)
 const speedControl = document.getElementById('speedControl');
 const speedValue = document.getElementById('speedValue');
 if (speedControl && speedValue) {
   speedControl.addEventListener('input', (e) => {
     animationSpeed = parseFloat(e.target.value);
-    if (animationSpeed === 0) {
-      speedValue.textContent = '0x Real Earth Time';
-    } else if (animationSpeed < 1) {
-      speedValue.textContent = animationSpeed.toFixed(1) + 'x Slow';
-    } else {
-      speedValue.textContent = animationSpeed.toFixed(1) + 'x Fast';
-    }
+    updateSpeedDisplay(animationSpeed);
   });
+  // Initialize speed display
+  updateSpeedDisplay(0.4);
 }
 
 const hideUIBtn = document.getElementById('hideUIBtn');
@@ -1758,7 +1786,7 @@ if (bloomControl && bloomValue) {
     bloomValue.textContent = strength.toFixed(1);
     const bloomModeBtn = document.getElementById('bloomModeBtn');
     if (bloomModeBtn) {
-      bloomModeBtn.textContent = 'Auto Bloom';
+      bloomModeBtn.textContent = t('ui.controls.autoBloom');
       bloomModeBtn.classList.add('active');
     }
     console.log(`🎛️ Manual bloom set to: ${strength}`);
@@ -1769,7 +1797,7 @@ const bloomModeBtn = document.getElementById('bloomModeBtn');
 if (bloomModeBtn) {
   bloomModeBtn.addEventListener('click', () => {
     isBloomManual = !isBloomManual;
-    bloomModeBtn.textContent = isBloomManual ? 'Auto Bloom' : 'Manual Bloom';
+    bloomModeBtn.textContent = isBloomManual ? t('ui.controls.autoBloom') : t('ui.controls.manualBloom');
     bloomModeBtn.classList.toggle('active', isBloomManual);
     
     if (!isBloomManual) {
@@ -1780,7 +1808,7 @@ if (bloomModeBtn) {
     }
   });
   
-  bloomModeBtn.textContent = isBloomManual ? 'Auto Bloom' : 'Manual Bloom';
+  bloomModeBtn.textContent = isBloomManual ? t('ui.controls.autoBloom') : t('ui.controls.manualBloom');
   bloomModeBtn.classList.toggle('active', isBloomManual);
 }
 
@@ -1788,7 +1816,7 @@ const pauseBtn = document.getElementById('pauseBtn');
 if (pauseBtn) {
   pauseBtn.addEventListener('click', () => {
     isPaused = !isPaused;
-    pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+    pauseBtn.textContent = isPaused ? t('ui.controls.resume') : t('ui.controls.pause');
     pauseBtn.classList.toggle('active', isPaused);
   });
 }
@@ -1932,7 +1960,7 @@ function startMusic() {
         updateMusicButtonStates(true);
         console.log("Atmospheric audio started");
       } else {
-        alert("🎵 Audio not available\n\nFor the best experience, try:\n• Check your browser audio settings\n• Ensure audio is not blocked\n• Try a different browser");
+        alert(t('messages.audioNotAvailable'));
       }
     });
   }
@@ -2081,7 +2109,7 @@ if (labelToggle) {
   labelToggle.addEventListener('click', () => {
     showPlanetLabels = !showPlanetLabels;
     labelToggle.classList.toggle('active', showPlanetLabels);
-    labelToggle.textContent = showPlanetLabels ? 'Hide Planet Names' : 'Show Planet Names';
+    labelToggle.textContent = showPlanetLabels ? t('ui.hidePlanetNames') : t('ui.showPlanetNames');
     
     planetLabels.forEach(label => {
       label.element.style.display = showPlanetLabels ? 'block' : 'none';
@@ -2094,7 +2122,7 @@ if (moonLabelToggle) {
   moonLabelToggle.addEventListener('click', () => {
     showMoonLabels = !showMoonLabels;
     moonLabelToggle.classList.toggle('active', showMoonLabels);
-    moonLabelToggle.textContent = showMoonLabels ? 'Hide Moon Names' : 'Show Moon Names';
+    moonLabelToggle.textContent = showMoonLabels ? t('ui.hideMoonNames') : t('ui.showMoonNames');
     
     moonLabels.forEach(label => {
       label.element.style.display = showMoonLabels ? 'block' : 'none';
@@ -2157,9 +2185,11 @@ if (allAsteroidsBtn) {
   });
 }
 
-// Planet list
-const planetList = document.getElementById('planetList');
-if (planetList) {
+// Planet list function with i18n
+function updatePlanetList() {
+  const planetList = document.getElementById('planetList');
+  if (!planetList) return;
+
   const groupedBodies = {
     planet: celestialBodies.filter(b => b.type === 'planet'),
     dwarf: celestialBodies.filter(b => b.type === 'dwarf'),
@@ -2168,10 +2198,10 @@ if (planetList) {
   };
 
   const typeLabels = {
-    planet: '🪐 PLANETS',
-    dwarf: '🌍 DWARF PLANETS', 
-    asteroid: '☄️ MAJOR ASTEROIDS',
-    tno: '🌌 TRANS-NEPTUNIAN OBJECTS'
+    planet: t('ui.categories.planets'),
+    dwarf: t('ui.categories.dwarfPlanets'),
+    asteroid: t('ui.categories.majorAsteroids'),
+    tno: t('ui.categories.transNeptunianObjects')
   };
 
   Object.entries(groupedBodies).forEach(([type, bodies]) => {
@@ -2187,15 +2217,18 @@ if (planetList) {
       const planetItem = document.createElement('div');
       planetItem.className = `planet-item ${body.type}`;
       
-      const moonText = body.moons && body.moons.length > 0 ? 
-        `<br><small>🌙 Moons: ${body.moons.length}</small>` : '';
+      // Use translated name
+      const bodyName = body.nameKey ? t(body.nameKey) : body.name;
       
+      const moonText = body.moons && body.moons.length > 0 ? 
+        `<br><small>🌙 ${t('ui.controls.moons')}: ${body.moons.length}</small>` : '';
+
       planetItem.innerHTML = `
-        <strong>${body.name}</strong>
-        <br><small>📏 Distance: ${body.dist} AU | Size: ${body.size}</small>
-        <br><small>🗓️ Discovered: ${body.discoveryYear}</small>
+        <strong>${bodyName}</strong>
+        <br><small>📏 ${t('ui.labels.distance')}: ${body.dist} ${t('units.au')} | ${t('ui.labels.size')}: ${body.size}</small>
+        <br><small>🗓️ ${t('ui.labels.discovered')}: ${body.discoveryYear}</small>
         ${moonText}
-      `;
+      `;   
       
       planetItem.addEventListener('click', () => {
         const planet = planetMeshes[globalIndex];
@@ -2233,33 +2266,66 @@ function showPlanetInfoCard(body, planetIndex) {
   const moonCount = document.getElementById('moonCount');
   const moonsContainer = document.getElementById('moonsContainer');
 
+  // UPDATE THE LABELS - Add these lines:
+  const orbitalPeriodLabel = orbitalPeriod.parentElement.querySelector('.info-item-label');
+  const sizeRelativeLabel = sizeRelative.parentElement.querySelector('.info-item-label');
+  const distanceFromSunLabel = distanceFromSun.parentElement.querySelector('.info-item-label');
+  const discoveryYearLabel = discoveryYear.parentElement.querySelector('.info-item-label');
+
+  if (orbitalPeriodLabel) orbitalPeriodLabel.textContent = t('ui.planetInfo.orbitalPeriod');
+  if (sizeRelativeLabel) sizeRelativeLabel.textContent = t('ui.planetInfo.sizeRelative');
+  if (distanceFromSunLabel) distanceFromSunLabel.textContent = t('ui.planetInfo.distanceFromSun');
+  if (discoveryYearLabel) discoveryYearLabel.textContent = t('ui.planetInfo.discoveryYear');
+
+  // Also update the Controls section header
+  const controlsHeader = document.querySelector('#planetInfoCard h4');
+  if (controlsHeader && controlsHeader.textContent.includes('Controls')) {
+    controlsHeader.textContent = t('ui.planetInfo.controls');
+  }
+
+  // Also update the Moons section header if it exists
+  const moonsHeader = document.querySelector('#planetInfoCard h4');
+  const allHeaders = document.querySelectorAll('#planetInfoCard h4');
+  allHeaders.forEach(header => {
+    if (header.textContent.includes('Moons')) {
+      header.innerHTML = `🌙 ${t('ui.controls.moons')} (<span id="moonCount">${body.moons?.length || 0}</span>)`;
+    }
+    if (header.textContent.includes('Controls') || header.textContent.includes('Contrôles')) {
+      header.textContent = t('ui.planetInfo.controls');
+    }
+  });
+
   // Remove planet icon emojis
   planetIcon.textContent = '';
-  planetName.textContent = body.name.toUpperCase();
+
+  // Use nameKey if available, otherwise use name
+  const bodyName = body.nameKey ? t(body.nameKey) : body.name;
+  planetName.textContent = bodyName.toUpperCase();
   
   // Set type badge
   const typeLabels = {
-    'planet': 'PLANET',
-    'dwarf': 'DWARF PLANET',
-    'asteroid': 'ASTEROID',
-    'tno': 'TNO'
+    planet: t('ui.categoriesNoEmoji.planets'),
+    dwarf: t('ui.categoriesNoEmoji.dwarfPlanets'),
+    asteroid: t('ui.categoriesNoEmoji.majorAsteroids'),
+    tno: t('ui.categoriesNoEmoji.transNeptunianObjects')
   };
-  planetTypeBadge.textContent = typeLabels[body.type] || 'CELESTIAL BODY';
+  planetTypeBadge.textContent = typeLabels[body.type] || t('ui.categoriesNoEmoji.celestialBody');
 
-  // Calculate orbital period in years (simplified calculation)
+  // Calculate orbital period in years (simplified calculation) 
   const orbitalPeriodYears = Math.sqrt(Math.pow(body.dist, 3));
   if (orbitalPeriodYears < 1) {
-    orbitalPeriod.textContent = `${Math.round(orbitalPeriodYears * 365)} days`;
-  } else if (orbitalPeriodYears < 10) {
-    orbitalPeriod.textContent = `${orbitalPeriodYears.toFixed(1)} years`;
+    orbitalPeriod.textContent = formatTimePeriod(orbitalPeriodYears * 365, 'days');
   } else {
-    orbitalPeriod.textContent = `${Math.round(orbitalPeriodYears)} years`;
+    orbitalPeriod.textContent = formatTimePeriod(orbitalPeriodYears, 'years');
   }
 
-  sizeRelative.textContent = `${body.size}x Earth`;
-  distanceFromSun.textContent = `${body.dist} AU`;
+  sizeRelative.textContent = `${body.size}x ${t('units.earthMass')}`;
+  distanceFromSun.textContent = `${body.dist} ${t('units.au')}`;
   discoveryYear.textContent = body.discoveryYear;
-  planetDescription.textContent = body.info;
+
+  // Use infoKey if available, otherwise use info
+  const bodyInfo = body.infoKey ? t(body.infoKey) : body.info;
+  planetDescription.textContent = bodyInfo;
 
   // Handle moons section
   if (body.moons && body.moons.length > 0) {
@@ -2273,20 +2339,23 @@ function showPlanetInfoCard(body, planetIndex) {
     body.moons.forEach((moon, moonIndex) => {
       const moonItem = document.createElement('div');
       moonItem.className = 'moon-item';
+
+      const orbitalPeriodDays = moon.speed > 0 ? (2 * Math.PI / moon.speed).toFixed(1) : t('ui.labels.unknown');
       
-      const orbitalPeriodDays = moon.speed > 0 ? (2 * Math.PI / moon.speed).toFixed(1) : 'Unknown';
-      
+      // Use nameKey if available, otherwise use name
+      const moonName = moon.nameKey ? t(moon.nameKey) : moon.name;
+
       moonItem.innerHTML = `
-        <div class="moon-name">🌙 ${moon.name}</div>
+        <div class="moon-name">🌙 ${moonName}</div>
         <div class="moon-info">
-          Size: ${moon.size}x Earth<br>
-          Distance: ${moon.dist} planet radii<br>
-          Period: ${orbitalPeriodDays} days
+          ${t('ui.labels.size')}: ${moon.size}x ${t('units.earthMass')}<br>
+          ${t('ui.labels.distance')}: ${moon.dist} ${t('ui.labels.planetRadii')}<br>
+          ${t('units.period')}: ${orbitalPeriodDays} ${t('units.days')}
         </div>
         <div class="moon-follow-btn">
-          <button class="follow-moon-btn">🎯 Follow</button>
+          <button class="follow-moon-btn">🎯 ${t('ui.labels.follow')}</button>
         </div>
-      `;
+      `;     
       
       // Add click event to show moon description and follow functionality
       moonItem.style.cursor = 'pointer';
@@ -2294,14 +2363,18 @@ function showPlanetInfoCard(body, planetIndex) {
       const moonInfoDiv = moonItem.querySelector('.moon-info');
       
       moonNameDiv.addEventListener('click', () => {
-        if (moon.info) {
-          alert(`🌙 ${moon.name}\n\n${moon.info}`);
+        // Use infoKey if available, otherwise use info
+        const moonInfo = moon.infoKey ? t(moon.infoKey) : moon.info;
+        if (moonInfo) {
+          alert(`🌙 ${moonName}\n\n${moonInfo}`);
         }
       });
       
       moonInfoDiv.addEventListener('click', () => {
-        if (moon.info) {
-          alert(`🌙 ${moon.name}\n\n${moon.info}`);
+        // Use infoKey if available, otherwise use info
+        const moonInfo = moon.infoKey ? t(moon.infoKey) : moon.info;
+        if (moonInfo) {
+          alert(`🌙 ${moonName}\n\n${moonInfo}`);
         }
       });
       
@@ -2322,6 +2395,36 @@ function showPlanetInfoCard(body, planetIndex) {
     moonsSection.style.display = 'none';
   }
 
+  // UPDATE CONTROLS SECTION - Add this to showPlanetInfoCard function:
+  const controlsInfo = document.querySelector('#planetInfoCard .controls-info');
+  if (controlsInfo) {
+    controlsInfo.innerHTML = `
+      <div class="control-item">
+        <div class="control-icon">🖱️</div>
+        <div class="control-text">
+          ${t('ui.planetInfo.controlsInfo.mouse')}
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">🔄</div>
+        <div class="control-text">
+          ${t('ui.planetInfo.controlsInfo.scroll')}
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">⌨️</div>
+        <div class="control-text">
+          ${t('ui.planetInfo.controlsInfo.reset')}
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">💫</div>
+        <div class="control-text">
+          ${t('ui.planetInfo.controlsInfo.orbits')}
+        </div>
+      </div>
+    `;
+  }
   // Show the card
   card.style.display = 'block';
 
@@ -2342,15 +2445,15 @@ function updateFollowButtonState(planetIndex) {
   
   currentPlanetIndex = planetIndex;
   
-  if (followingTarget === currentPlanet && followingType === 'planet') {
-    followBtn.textContent = '🛑 STOP FOLLOWING';
+  if (followingTarget === currentPlanet && followingType === 'planet') {    
+    followBtn.textContent = t('ui.planetInfo.stopFollow');
     followBtn.classList.add('following');
     if (stopFollowBtn) {
       stopFollowBtn.style.display = 'block';
       stopFollowBtn.classList.add('active');
     }
   } else {
-    followBtn.textContent = '🎯 FOLLOW PLANET';
+    followBtn.textContent = t('ui.planetInfo.followPlanet');
     followBtn.classList.remove('following');
     if (stopFollowBtn && !followingTarget) {
       stopFollowBtn.style.display = 'none';
@@ -2468,7 +2571,7 @@ function stopFollowingPlanet() {
   const stopFollowBtn = document.getElementById('stopFollowBtn');
   
   if (followBtn) {
-    followBtn.textContent = '🎯 FOLLOW PLANET';
+    followBtn.textContent = t('ui.planetInfo.followPlanet');
     followBtn.classList.remove('following');
   }
   
@@ -2847,7 +2950,7 @@ function onMouseClick(event) {
           mesh: moon.mesh,
           moonData: moon,
           planetIndex: planetIndex,
-          planetName: celestialBodies[planetIndex].name
+          planetnameKey: celestialBodies[planetIndex].name
         });
         // clickableObjects.push(moon.mesh); // DISABLED: moons not clickable
       });
@@ -2889,6 +2992,245 @@ function onMouseClick(event) {
   }
 }
 
+// Update the info panel labels as well
+function updateInfoPanel() {
+  const infoPanel = document.querySelector('.info');
+  if (infoPanel) {
+    infoPanel.innerHTML = `
+      <strong style="font-family: 'Orbitron', monospace; color: var(--star-gold);">${t('info.title')}</strong><br>
+      ${t('info.stats.planets')}<br>
+      ${t('info.stats.dwarfPlanets')}<br>
+      ${t('info.stats.asteroidBelts')}<br>
+      ${t('info.stats.transNeptunianObjects')}<br>
+      ${t('info.stats.moons')}<br>
+      ${t('info.stats.glowingOrbits')}<br>
+      ${t('info.stats.atmosphericMusic')}<br>
+      ${t('info.stats.realTimeData')}<br>
+      <button id="followSunBtn" class="follow-sun-btn">${t('ui.planetInfo.followSun')}</button>
+    `;
+    
+    // Re-add event listener for follow sun button
+    const newFollowSunBtn = document.getElementById('followSunBtn');
+    if (newFollowSunBtn) {
+      newFollowSunBtn.addEventListener('click', () => {
+        followSun();
+      });
+    }
+  }
+}
+
+// Function to re-attach all Mission Control event listeners
+function reattachMissionControlEventListeners() {
+  // Speed control
+  const speedControl = document.getElementById('speedControl');
+  if (speedControl) {
+    speedControl.addEventListener('input', (e) => {
+      animationSpeed = parseFloat(e.target.value);
+      updateSpeedDisplay(animationSpeed);
+    });
+  }
+
+  // Bloom control
+  const bloomControl = document.getElementById('bloomControl');
+  if (bloomControl) {
+    bloomControl.addEventListener('input', (e) => {
+      const strength = parseFloat(e.target.value);
+      manualBloomStrength = strength;
+      isBloomManual = true;
+      bloomPass.strength = strength;
+      document.getElementById('bloomValue').textContent = strength.toFixed(1);
+    });
+  }
+
+  // Pause button
+  const pauseBtn = document.getElementById('pauseBtn');
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? t('ui.controls.resume') : t('ui.controls.pause');
+      pauseBtn.classList.toggle('active', isPaused);
+    });
+  }
+
+  // Reset button
+  const resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      stopFollowingPlanet();
+    });
+  }
+
+  // Hide UI button
+  const hideUIBtn = document.getElementById('hideUIBtn');
+  if (hideUIBtn) {
+    hideUIBtn.addEventListener('click', () => {
+      const uiControls = document.getElementById('uiControls');
+      const celestialPanel = document.querySelector('.celestial-panel');
+      const infoPanel = document.querySelector('.info');
+      const showUIBtn = document.getElementById('showUIBtn');
+      
+      if (uiControls) uiControls.classList.add('ui-hidden');
+      if (celestialPanel) celestialPanel.classList.add('ui-hidden');
+      if (infoPanel) infoPanel.classList.add('ui-hidden');
+      if (showUIBtn) showUIBtn.style.display = 'block';
+    });
+  }
+
+  // Music controls
+  const musicBtn = document.getElementById('musicBtn');
+  const muteMusicBtn = document.getElementById('muteMusicBtn');
+  if (musicBtn) musicBtn.addEventListener('click', startMusic);
+  if (muteMusicBtn) muteMusicBtn.addEventListener('click', stopMusic);
+
+  // Volume control
+  const volumeControl = document.getElementById('volumeControl');
+  if (volumeControl) {
+    volumeControl.addEventListener('input', (e) => {
+      const volume = parseFloat(e.target.value);
+      spaceMusic.volume = volume;
+      if (atmosphereGain) {
+        atmosphereGain.gain.value = volume;
+      }
+      document.getElementById('volumeValue').textContent = Math.round(volume * 100) + '%';
+    });
+  }
+
+  // All the toggle buttons
+  const orbitsBtn = document.getElementById('orbitsBtn');
+  if (orbitsBtn) {
+    orbitsBtn.addEventListener('click', () => {
+      showOrbits = !showOrbits;
+      orbitsBtn.classList.toggle('active', showOrbits);
+      planetMeshes.forEach(planet => {
+        if (planet.orbit) {
+          planet.orbit.visible = showOrbits;
+        }
+      });
+    });
+  }
+}
+
+// Update the celestial panel header
+function updateMissionControlContent() {
+  // UPDATE MISSION CONTROL CONTENT - Add this section:
+  const missionControlContent = document.querySelector('.control-content');
+  if (missionControlContent) {
+    // Get current values
+    const speedValue = document.getElementById('speedControl')?.value || 0.4;
+    const bloomValue = document.getElementById('bloomControl')?.value || 0.5;
+    const volumeValue = document.getElementById('volumeControl')?.value || 0.3;
+    
+    // Get current button states
+    const isPausedState = document.getElementById('pauseBtn')?.classList.contains('active') || false;
+    const isOrbitsActive = document.getElementById('orbitsBtn')?.classList.contains('active') || true;
+    const isMoonsActive = document.getElementById('moonsBtn')?.classList.contains('active') || true;
+    const isRealAsteroidsActive = document.getElementById('realAsteroidsBtn')?.classList.contains('active') || true;
+    const isCometsActive = document.getElementById('cometsBtn')?.classList.contains('active') || true;
+    const isAllAsteroidsActive = document.getElementById('allAsteroidsBtn')?.classList.contains('active') || true;
+    const isMainAsteroidsActive = document.getElementById('mainAsteroidsBtn')?.classList.contains('active') || true;
+    const isTrojansActive = document.getElementById('trojansBtn')?.classList.contains('active') || true;
+    const isKuiperActive = document.getElementById('kuiperBtn')?.classList.contains('active') || true;
+    const isScatteredActive = document.getElementById('scatteredBtn')?.classList.contains('active') || true;
+    const isMusicPlaying = document.getElementById('muteMusicBtn')?.style.display !== 'none';
+
+    missionControlContent.innerHTML = `
+      <div class="control-group">
+        <label>${t('ui.controls.speed')}</label>
+        <input type="range" id="speedControl" min="0" max="10" step="0.1" value="${speedValue}">
+        <span id="speedValue" class="value-display">${speedValue}x ${t('ui.labels.slowearthtime')}</span>
+      </div>
+      
+      <div class="control-group">
+        <label>${t('ui.controls.bloom')}</label>
+        <input type="range" id="bloomControl" min="0" max="2" step="0.1" value="${bloomValue}">
+        <span id="bloomValue" class="value-display">${bloomValue}</span>
+      </div>
+      
+      <div class="control-group">
+        <button id="pauseBtn" ${isPausedState ? 'class="active"' : ''}>${isPausedState ? t('ui.controls.resume') : t('ui.controls.pause')}</button>
+        <button id="resetBtn">${t('ui.controls.reset')}</button>
+        <button id="hideUIBtn">${t('ui.controls.hideUI')}</button>
+      </div>
+
+      <div class="control-group">
+        <label>${t('ui.controls.cameraControl')}</label>
+        <button id="stopFollowBtn" style="display: none;" class="active">🛑 ${t('ui.planetInfo.stopFollowing')}</button>
+      </div>
+      
+      <div class="control-group">
+        <label>${t('ui.controls.atmosphere')}</label>
+        <button id="musicBtn" ${!isMusicPlaying ? '' : 'style="display: none;"'}>${t('ui.controls.music')}</button>
+        <button id="muteMusicBtn" ${isMusicPlaying ? '' : 'style="display: none;"'}>${t('ui.controls.mute')}</button>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="${volumeValue}" style="width: 80%; margin-top: 5px;">
+        <span id="volumeValue" class="value-display">${Math.round(volumeValue * 100)}%</span>
+      </div>
+      
+      <div class="control-group">
+        <label>${t('ui.controls.toggle')}</label>
+        <button id="orbitsBtn" ${isOrbitsActive ? 'class="active"' : ''}>${t('ui.controls.orbits')}</button>
+        <button id="moonsBtn" ${isMoonsActive ? 'class="active"' : ''}>${t('ui.controls.moons')}</button>
+        <button id="realAsteroidsBtn" ${isRealAsteroidsActive ? 'class="active"' : ''}>${t('ui.controls.realAsteroids')}</button>
+        <button id="cometsBtn" ${isCometsActive ? 'class="active"' : ''}>${t('ui.controls.comets')}</button>
+      </div>
+      
+      <div class="control-group">
+        <label>${t('ui.controls.asteroidBelts')}</label>
+        <button id="allAsteroidsBtn" ${isAllAsteroidsActive ? 'class="active"' : ''}>${t('ui.controls.allBelts')}</button>
+        <button id="mainAsteroidsBtn" ${isMainAsteroidsActive ? 'class="active"' : ''}>${t('ui.controls.mainBelt')}</button>
+        <button id="trojansBtn" ${isTrojansActive ? 'class="active"' : ''}>${t('ui.controls.trojans')}</button>
+        <button id="kuiperBtn" ${isKuiperActive ? 'class="active"' : ''}>${t('ui.controls.kuiper')}</button>
+        <button id="scatteredBtn" ${isScatteredActive ? 'class="active"' : ''}>${t('ui.controls.scattered')}</button>
+      </div>
+    `;
+
+    // Re-attach all event listeners after rebuilding the HTML
+    reattachMissionControlEventListeners();
+  }
+}
+
+// Update the celestial panel header
+function updateCelestialPanelHeader() {
+  const celestialHeader = document.querySelector('.celestial-header h4');
+  if (celestialHeader) {
+    const icon = celestialHeader.querySelector('.toggle-icon');
+    const iconHTML = icon ? icon.outerHTML : '';
+    celestialHeader.innerHTML = `${t('ui.celestialBodies')} ${iconHTML}`;
+  }
+}
+
+// Update the control panel header
+function updateControlPanelHeader() {
+  const controlHeader = document.querySelector('.control-header h3');
+  if (controlHeader) {
+    const icon = controlHeader.querySelector('.control-toggle-icon');
+    const iconHTML = icon ? icon.outerHTML : '';
+    controlHeader.innerHTML = `${t('ui.controls.missionControl')} ${iconHTML}`;
+  }
+}
+
+// Function to update all static UI elements with current language
+function updateStaticUIElements() {
+  updateControlPanelHeader();
+  updateCelestialPanelHeader();
+  updateMissionControlContent();
+  updateInfoPanel();
+
+  // Update toggles text elements
+  const labelToggle = document.getElementById('labelToggle');
+  if (labelToggle) {
+    labelToggle.textContent = showPlanetLabels ? t('ui.hidePlanetNames') : t('ui.showPlanetNames');
+  }
+  
+  const moonLabelToggle = document.getElementById('moonLabelToggle');
+  if (moonLabelToggle) {
+    moonLabelToggle.textContent = showMoonLabels ? t('ui.hideMoonNames') : t('ui.showMoonNames');
+  }
+  
+  const pauseBtn = document.getElementById('pauseBtn');
+  if (pauseBtn) {
+    pauseBtn.textContent = isPaused ? t('ui.controls.resume') : t('ui.controls.pause');
+  }
+}
 // Raycaster for planet clicking
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -2925,22 +3267,76 @@ if (followSunBtn) {
   });
 }
 
-// Update planet list click handlers to also show info card
+// Function to initialize UI on page load
+function initializeUIWithLanguage() {
+  const savedLanguage = getCurrentLanguage();
+  console.log('Initializing UI with saved language:', savedLanguage);
+  
+  // Set the correct language button as active
+  const langButtons = document.querySelectorAll('.lang-btn');
+  langButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === savedLanguage);
+  });
+  
+  // Update all static UI elements
+  updateStaticUIElements();
+  
+  // Update planet list
+  updatePlanetList();
+  
+  // Update speed display
+  updateSpeedDisplay(animationSpeed);
+}
+
+// Language switching function
+function switchLanguage(lang) {
+  if (setLanguage(lang)) {
+    console.log(`Language switched to: ${lang}`);
+    // Update all static UI elements
+    updateStaticUIElements();
+    
+    // Update planet list
+    updatePlanetList();
+    
+    // Update speed display
+    updateSpeedDisplay(animationSpeed);
+    
+    // Update planet labels
+    planetLabels.forEach((label, index) => {
+      const body = celestialBodies[index];
+      const bodyName = body.nameKey ? t(body.nameKey) : body.name;
+      label.element.textContent = bodyName;
+    });
+    
+    // Update moon labels
+    moonLabels.forEach(label => {
+      const moonName = label.moonData.nameKey ? t(label.moonData.nameKey) : label.moonData.name;
+      label.element.textContent = moonName;
+    });
+    
+    // If planet info card is open, refresh it
+    const planetInfoCard = document.getElementById('planetInfoCard');
+    if (planetInfoCard && planetInfoCard.style.display === 'block' && currentPlanetIndex !== null) {
+      showPlanetInfoCard(celestialBodies[currentPlanetIndex], currentPlanetIndex);
+    }
+    
+  }
+}
+
+// Initialize UI with current language
 document.addEventListener('DOMContentLoaded', () => {
-  const originalPlanetItemHandler = planetItem => {
-    const originalHandler = planetItem.onclick;
-    planetItem.onclick = function(event) {
-      if (originalHandler) originalHandler.call(this, event);
-      
-      // Find the planet index from the element
-      const planetName = this.querySelector('strong').textContent;
-      const planetIndex = celestialBodies.findIndex(body => body.name === planetName);
-      if (planetIndex !== -1) {
-        showPlanetInfoCard(celestialBodies[planetIndex], planetIndex);
-      }
-    };
-  };
+  initializeUIWithLanguage();
+  //updatePlanetList();
+
+  // Set the correct language button as active
+  //const currentLang = getCurrentLanguage();
+  //const langButtons = document.querySelectorAll('.lang-btn');
+  //langButtons.forEach(btn => {
+  //  btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+  //});
 });
+
+
 
 // Keyboard shortcuts
 window.addEventListener('keydown', (event) => {
@@ -3036,7 +3432,7 @@ window.addEventListener('keydown', (event) => {
       isBloomManual = !isBloomManual;
       const bloomModeBtn = document.getElementById('bloomModeBtn');
       if (bloomModeBtn) {
-        bloomModeBtn.textContent = isBloomManual ? 'Auto Bloom' : 'Manual Bloom';
+        bloomModeBtn.textContent = isBloomManual ? t('ui.controls.autoBloom') : t('ui.controls.manualBloom');
         bloomModeBtn.classList.toggle('active', isBloomManual);
       }
       
@@ -3074,3 +3470,8 @@ window.addEventListener("resize", () => {
   updatePlanetLabels();
   updateMoonLabels();
 });
+
+// Initialize planet list after DOM is loaded
+updatePlanetList();
+
+window.switchLanguage = switchLanguage;
