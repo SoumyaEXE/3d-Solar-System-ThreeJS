@@ -855,8 +855,7 @@ const celestialBodies = [
     type: "planet",
     info: "Hottest planet in our solar system with surface temperatures of 462°C. Has a thick, toxic atmosphere of carbon dioxide.",
     discoveryYear: "Ancient",
-    moons: [],
-    rotationDirection: -1
+    moons: []
   },
   {
     name: "Earth",
@@ -986,8 +985,7 @@ const celestialBodies = [
       { name: "Oberon", size: 0.10, dist: 3.4, speed: 0.075, color: new THREE.Color(0.5, 0.5, 0.55), info: "Outermost major moon with ancient cratered surface.", initialAngle: 5.3 },
       { name: "Miranda", size: 0.06, dist: 1.8, speed: 0.67, color: new THREE.Color(0.53, 0.53, 0.53), info: "Most unusual moon with extreme geological features.", initialAngle: 3.7 },
       { name: "Puck", size: 0.03, dist: 1.5, speed: 1.18, color: new THREE.Color(0.45, 0.45, 0.5), info: "Small irregular moon discovered by Voyager 2.", initialAngle: 0.8 }
-    ],
-     rotationDirection: -1
+    ]
   },
   {
     name: "Neptune",
@@ -1454,6 +1452,16 @@ let followOffset = new THREE.Vector3(10, 5, 10);
 let lastPlanetPosition = new THREE.Vector3();
 let userCameraOffset = new THREE.Vector3();
 
+// Eclipse Tour Variables
+let eclipseTourActive = false;
+let eclipseTourPhase = 0;
+let eclipseTourTimer = 0;
+let eclipseType = 'solar'; // 'solar' or 'lunar'
+const eclipsePhaseDuration = 12000; // 12 seconds per phase for slow cinematic pacing
+let originalEclipsePositions = {};
+let eclipseCameraPositions = [];
+let eclipseCorona = null;
+
 // Create planet labels
 function createPlanetLabels() {
   planetMeshes.forEach((planetObj, index) => {
@@ -1557,6 +1565,11 @@ function animate() {
   }
   frameCount++;
 
+  // Update Eclipse Tour
+  if (eclipseTourActive) {
+    updateEclipseTour();
+  }
+
   if (!isPaused) {
     let realTimeMultiplier = animationSpeed === 0 ? 0.0001 : animationSpeed;
     
@@ -1569,12 +1582,11 @@ function animate() {
     
     sun.rotation.y += 0.002 * realTimeMultiplier;
 
-    planetMeshes.forEach((p, index) => {
-  const body = celestialBodies[index];
-  const rotationDirection = body.rotationDirection || 1; // Default to prograde (1)
-  
-  p.pivot.rotation.y += p.speed * realTimeMultiplier;
-  p.mesh.rotation.y += 0.01 * realTimeMultiplier * rotationDirection; // Apply 
+    planetMeshes.forEach((p) => {
+  // If eclipse tour active, slow orbital and rotation speeds for cinematic visuals
+  const cinematicFactor = eclipseTourActive ? 0.08 : 1.0;
+  p.pivot.rotation.y += p.speed * realTimeMultiplier * cinematicFactor;
+  p.mesh.rotation.y += 0.01 * realTimeMultiplier * cinematicFactor;
       
       if (p.orbit && p.orbit.userData && p.orbit.userData.pulseSpeed) {
         try {
@@ -1596,9 +1608,10 @@ function animate() {
       
       if (p.moons && p.moons.length > 0) {
         p.moons.forEach((moon) => {
-          const adjustedMoonSpeed = moon.speed * 0.1;
+          const moonCinematic = eclipseTourActive ? 0.06 : 0.1;
+          const adjustedMoonSpeed = moon.speed * moonCinematic;
           moon.pivot.rotation.y += adjustedMoonSpeed * realTimeMultiplier;
-          moon.mesh.rotation.y += 0.02 * realTimeMultiplier;
+          moon.mesh.rotation.y += 0.02 * realTimeMultiplier * (eclipseTourActive ? 0.6 : 1.0);
         });
       }
     });
@@ -1610,13 +1623,13 @@ function animate() {
         asteroid.mesh.rotation.y += asteroid.rotationSpeed.y * realTimeMultiplier;
         asteroid.mesh.rotation.z += asteroid.rotationSpeed.z * realTimeMultiplier;
         
-        asteroid.angle += asteroid.orbitSpeed * realTimeMultiplier;
+      asteroid.angle += asteroid.orbitSpeed * realTimeMultiplier * (eclipseTourActive ? 0.06 : 1.0);
         asteroid.mesh.position.x = Math.cos(asteroid.angle) * asteroid.radius;
         asteroid.mesh.position.z = Math.sin(asteroid.angle) * asteroid.radius;
       });
     });
 
-    distantStars.rotation.y += 0.0001 * realTimeMultiplier;
+      distantStars.rotation.y += 0.0001 * realTimeMultiplier * (eclipseTourActive ? 0.06 : 1.0);
   }
 
   controls.update();
@@ -1784,6 +1797,58 @@ const resetBtn = document.getElementById('resetBtn');
 if (resetBtn) {
   resetBtn.addEventListener('click', () => {
     stopFollowingPlanet();
+  });
+}
+
+// Eclipse Tour buttons
+const solarEclipseTourBtn = document.getElementById('solarEclipseTourBtn');
+const lunarEclipseTourBtn = document.getElementById('lunarEclipseTourBtn');
+
+if (solarEclipseTourBtn) {
+  solarEclipseTourBtn.addEventListener('click', () => {
+    if (eclipseTourActive) {
+      stopEclipseTour();
+    } else {
+      eclipseType = 'solar';
+      startEclipseTour();
+    }
+  });
+}
+
+if (lunarEclipseTourBtn) {
+  lunarEclipseTourBtn.addEventListener('click', () => {
+    if (eclipseTourActive) {
+      stopEclipseTour();
+    } else {
+      eclipseType = 'lunar';
+      startEclipseTour();
+    }
+  });
+}
+
+// Special Events Panel Eclipse Tour Buttons
+const solarEclipseTour = document.getElementById('solarEclipseTour');
+const lunarEclipseTour = document.getElementById('lunarEclipseTour');
+
+if (solarEclipseTour) {
+  solarEclipseTour.addEventListener('click', () => {
+    if (eclipseTourActive) {
+      stopEclipseTour();
+    } else {
+      eclipseType = 'solar';
+      startEclipseTour();
+    }
+  });
+}
+
+if (lunarEclipseTour) {
+  lunarEclipseTour.addEventListener('click', () => {
+    if (eclipseTourActive) {
+      stopEclipseTour();
+    } else {
+      eclipseType = 'lunar';
+      startEclipseTour();
+    }
   });
 }
 
@@ -2420,6 +2485,338 @@ function hidePlanetInfoCard() {
   card.style.display = 'none';
 }
 
+// Eclipse Tour Functions
+function createEclipseCorona() {
+  if (eclipseCorona) {
+    scene.remove(eclipseCorona);
+  }
+  
+  const coronaGeometry = new THREE.RingGeometry(5.2, 8, 32);
+  const coronaMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide
+  });
+  
+  eclipseCorona = new THREE.Mesh(coronaGeometry, coronaMaterial);
+  eclipseCorona.lookAt(camera.position);
+  scene.add(eclipseCorona);
+}
+
+function startEclipseTour() {
+  if (eclipseTourActive) {
+    stopEclipseTour();
+    return;
+  }
+  
+  eclipseTourActive = true;
+  eclipseTourPhase = 0;
+  eclipseTourTimer = 0;
+  
+  // Store original positions
+  originalEclipsePositions.earth = planetMeshes[2].pivot.rotation.y;
+  originalEclipsePositions.moon = planetMeshes[2].moons[0].pivot.rotation.y;
+  
+  // Define camera positions for cinematic tour
+  eclipseCameraPositions = [
+    // Phase 0: Wide view showing alignment
+    { position: new THREE.Vector3(0, 20, 40), target: new THREE.Vector3(0, 0, 0) },
+    // Phase 1: Side view of Earth-Moon-Sun
+    { position: new THREE.Vector3(25, 5, 0), target: new THREE.Vector3(15, 0, 0) },
+    // Phase 2: Close to Earth during eclipse
+    { position: new THREE.Vector3(16, 2, 3), target: new THREE.Vector3(15, 0, 0) },
+    // Phase 3: Corona view during totality
+    { position: new THREE.Vector3(14, 1, 1), target: new THREE.Vector3(0, 0, 0) },
+    // Phase 4: Shadow on Earth view
+    { position: new THREE.Vector3(15, 8, 5), target: new THREE.Vector3(15, 0, 0) }
+  ];
+  
+  // Position Earth and Moon for eclipse
+  positionForEclipse();
+  
+  // Create corona effect
+  createEclipseCorona();
+  
+  // Show info panel
+  const infoPanel = document.getElementById('eclipseTourInfo');
+  if (infoPanel) {
+    // Make the info panel visible at bottom and semi-transparent
+    infoPanel.style.display = 'block';
+    infoPanel.style.opacity = '0.98';
+    
+    // Update title and emoji based on eclipse type
+    const titleElement = infoPanel.querySelector('h3');
+    const emojiElement = infoPanel.querySelector('div[style*="font-size:40px"]');
+    
+    if (eclipseType === 'solar') {
+      if (titleElement) titleElement.textContent = 'Solar Eclipse: Cinematic Tour';
+      if (emojiElement) emojiElement.textContent = '🌒';
+    } else {
+      if (titleElement) titleElement.textContent = 'Lunar Eclipse: Cinematic Tour';
+      if (emojiElement) emojiElement.textContent = '🌕';
+    }
+  }
+  
+  // Update button
+  const solarBtn = document.getElementById('solarEclipseTourBtn');
+  const lunarBtn = document.getElementById('lunarEclipseTourBtn');
+  
+  if (eclipseType === 'solar' && solarBtn) {
+    solarBtn.classList.add('active');
+    solarBtn.textContent = '⏹️ Stop Solar Tour';
+  } else if (eclipseType === 'lunar' && lunarBtn) {
+    lunarBtn.classList.add('active');
+    lunarBtn.textContent = '⏹️ Stop Lunar Tour';
+  }
+  
+  // Hide all UI elements during tour for cinematic experience
+  const uiEls = document.querySelectorAll('.controls, .celestial-panel, .info, #planetInfoCard, #showUIBtn');
+  uiEls.forEach(el => {
+    if (el) {
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+      el.classList.add('ui-hidden');
+    }
+  });
+
+  // Dim distant stars slightly for emphasis
+  if (distantStars && distantStars.material) {
+    distantStars.material.opacity = 0.65;
+  }
+  
+  console.log('🌒 Eclipse Tour Started! Enjoy the cinematic journey...');
+}
+
+function positionForEclipse() {
+  // Position Earth
+  planetMeshes[2].pivot.rotation.y = 0; // Earth at 0 degrees
+  
+  // Position Moon based on eclipse type
+  if (planetMeshes[2].moons && planetMeshes[2].moons[0]) {
+    if (eclipseType === 'solar') {
+      // Solar eclipse: Moon between Sun and Earth
+      planetMeshes[2].moons[0].pivot.rotation.y = 0; // Moon on same side as Earth, closer to Sun
+    } else {
+      // Lunar eclipse: Earth between Sun and Moon
+      planetMeshes[2].moons[0].pivot.rotation.y = Math.PI; // Moon at 180 degrees (opposite side from Sun)
+    }
+  }
+}
+
+function updateEclipseTour() {
+  if (!eclipseTourActive) return;
+  
+  eclipseTourTimer += 16; // Assuming 60fps
+  
+  // Switch phases every 4 seconds
+  if (eclipseTourTimer >= eclipsePhaseDuration) {
+    eclipseTourPhase++;
+    eclipseTourTimer = 0;
+    
+    if (eclipseTourPhase >= eclipseCameraPositions.length) {
+      stopEclipseTour();
+      return;
+    }
+  }
+  
+  // Update progress bar and phase info
+  updateEclipsePhaseInfo();
+  
+  // Smooth camera transition
+  const currentPhase = eclipseCameraPositions[eclipseTourPhase];
+  const progress = eclipseTourTimer / eclipsePhaseDuration;
+  const smoothProgress = 0.5 * (1 - Math.cos(progress * Math.PI)); // Smooth interpolation
+  
+  // Update camera position
+  if (eclipseTourPhase > 0) {
+    const prevPhase = eclipseCameraPositions[eclipseTourPhase - 1];
+    camera.position.lerpVectors(prevPhase.position, currentPhase.position, smoothProgress);
+    
+    const lerpTarget = new THREE.Vector3();
+    lerpTarget.lerpVectors(prevPhase.target, currentPhase.target, smoothProgress);
+    controls.target.copy(lerpTarget);
+  } else {
+    camera.position.lerp(currentPhase.position, 0.02);
+    controls.target.lerp(currentPhase.target, 0.02);
+  }
+  
+  // Eclipse effects based on phase
+  updateEclipseEffects();
+  
+  controls.update();
+}
+
+function updateEclipsePhaseInfo() {
+  const phaseTitle = document.getElementById('eclipsePhaseTitle');
+  const phaseDesc = document.getElementById('eclipsePhaseDesc');
+  const progressBar = document.getElementById('eclipseProgress');
+  
+  if (!phaseTitle || !phaseDesc || !progressBar) return;
+  
+  const progress = (eclipseTourTimer / eclipsePhaseDuration) * 100;
+  progressBar.style.width = `${progress}%`;
+  
+  // Different phase descriptions for solar vs lunar eclipse
+  const solarEclipseInfo = [
+    {
+      title: "Phase 1: Getting Ready (Alignment)",
+      desc: "We start far away so you can see the Sun, Earth and Moon line up. Think of it as three friends standing in a row — from our view, they look perfect when they line up. This helps you see how the solar eclipse can happen."
+    },
+    {
+      title: "Phase 2: First Contact (Moon Moves In)",
+      desc: "Now the Moon slowly moves between the Earth and the Sun. You will see the Sun start to look a little bitten — that's the Moon covering it. Take your time, watch the motion."
+    },
+    {
+      title: "Phase 3: Approaching Totality (Shadow Grows)",
+      desc: "The Moon's shadow stretches over the Earth. The light will change and things will get dimmer — like when clouds pass over the sun. We'll move closer so you can feel the scale."
+    },
+    {
+      title: "Phase 4: Total Solar Eclipse (The Corona)",
+      desc: "For a brief magical moment the Sun is hidden and we can see the corona — a beautiful glowing ring. It's one of the most stunning sights in space. We'll slow down so you can enjoy every second."
+    },
+    {
+      title: "Phase 5: The Shadow Passes (Ending)",
+      desc: "The Moon moves on and sunlight returns. The shadow sweeps away and everything goes back to normal. We'll pull back so you can see the full scene again."
+    }
+  ];
+
+  const lunarEclipseInfo = [
+    {
+      title: "Phase 1: Getting Ready (Alignment)",
+      desc: "We start far away so you can see the Sun, Earth and Moon line up. Think of it as three friends standing in a row — but this time Earth is in the middle, blocking sunlight from reaching the Moon. This helps you see how the lunar eclipse can happen."
+    },
+    {
+      title: "Phase 2: Entering Earth's Shadow (Penumbra)",
+      desc: "Now the Moon slowly moves into Earth's shadow. You will see the Moon start to look a little darker — that's Earth's shadow covering it. The Moon doesn't disappear, it just gets dimmer as Earth blocks the sunlight."
+    },
+    {
+      title: "Phase 3: Deeper Shadow (Umbra Approaches)",
+      desc: "The Moon moves deeper into Earth's shadow. The light will change and the Moon will get much darker — like when you stand in someone's shadow. We'll move closer so you can see how Earth completely blocks direct sunlight."
+    },
+    {
+      title: "Phase 4: Total Lunar Eclipse (Complete Shadow)",
+      desc: "For a moment the Moon is completely in Earth's shadow! Even though no direct sunlight reaches it, the Moon doesn't completely disappear. Some light still reaches it after bending through Earth's atmosphere, which is why we can still see it faintly."
+    },
+    {
+      title: "Phase 5: Leaving the Shadow (Ending)",
+      desc: "The Moon moves out of Earth's shadow and returns to its normal bright color. The shadow passes away and everything goes back to normal. We'll pull back so you can see the full scene again."
+    }
+  ];
+  
+  const phaseInfo = eclipseType === 'solar' ? solarEclipseInfo : lunarEclipseInfo;
+  
+  if (eclipseTourPhase < phaseInfo.length) {
+    phaseTitle.textContent = phaseInfo[eclipseTourPhase].title;
+    phaseDesc.textContent = phaseInfo[eclipseTourPhase].desc;
+  }
+}
+
+function updateEclipseEffects() {
+  const progress = eclipseTourTimer / eclipsePhaseDuration;
+  
+  switch (eclipseTourPhase) {
+    case 0: // Approach phase
+      if (eclipseCorona) {
+        eclipseCorona.material.opacity = 0;
+      }
+      break;
+      
+    case 1: // Partial eclipse begins
+  // Dim ambient light slightly
+  ambientLight.intensity = 0.5 - (progress * 0.25);
+      break;
+      
+    case 2: // Approaching totality
+  ambientLight.intensity = 0.4 - (progress * 0.35);
+      if (eclipseCorona) {
+        eclipseCorona.material.opacity = progress * 0.3;
+        eclipseCorona.lookAt(camera.position);
+      }
+      break;
+      
+    case 3: // Totality - show corona
+      // Make the scene very dark to emphasize corona
+      ambientLight.intensity = 0.08;
+      if (eclipseCorona) {
+        eclipseCorona.material.opacity = 0.85;
+        eclipseCorona.lookAt(camera.position);
+      }
+      break;
+      
+    case 4: // Eclipse ending
+      ambientLight.intensity = 0.08 + (progress * 0.5);
+      if (eclipseCorona) {
+        eclipseCorona.material.opacity = 0.85 - (progress * 0.9);
+      }
+      break;
+  }
+}
+
+function stopEclipseTour() {
+  eclipseTourActive = false;
+  eclipseTourPhase = 0;
+  eclipseTourTimer = 0;
+  
+  // Restore original positions
+  if (originalEclipsePositions.earth !== undefined) {
+    planetMeshes[2].pivot.rotation.y = originalEclipsePositions.earth;
+  }
+  if (originalEclipsePositions.moon !== undefined && planetMeshes[2].moons && planetMeshes[2].moons[0]) {
+    planetMeshes[2].moons[0].pivot.rotation.y = originalEclipsePositions.moon;
+  }
+  
+  // Restore lighting
+  ambientLight.intensity = 0.5;
+  
+  // Remove corona
+  if (eclipseCorona) {
+    scene.remove(eclipseCorona);
+    eclipseCorona = null;
+  }
+  
+  // Hide info panel
+  const infoPanel = document.getElementById('eclipseTourInfo');
+  if (infoPanel) {
+    infoPanel.style.display = 'none';
+    infoPanel.style.opacity = '0';
+  }
+  
+  // Restore UI elements
+  const uiEls = document.querySelectorAll('.controls, .celestial-panel, .info, #planetInfoCard, #showUIBtn');
+  uiEls.forEach(el => {
+    if (el) {
+      el.style.opacity = '1';
+      el.style.pointerEvents = 'auto';
+      el.classList.remove('ui-hidden');
+    }
+  });
+
+  // Restore distant stars opacity
+  if (distantStars && distantStars.material) {
+    distantStars.material.opacity = 0.9;
+  }
+  
+  // Reset camera controls
+  controls.enableDamping = true;
+  
+  // Update buttons
+  const solarBtn = document.getElementById('solarEclipseTourBtn');
+  const lunarBtn = document.getElementById('lunarEclipseTourBtn');
+  
+  if (solarBtn) {
+    solarBtn.classList.remove('active');
+    solarBtn.textContent = '🌒 Solar Eclipse Tour';
+  }
+  if (lunarBtn) {
+    lunarBtn.classList.remove('active');
+    lunarBtn.textContent = '🌕 Lunar Eclipse Tour';
+  }
+  
+  console.log('Eclipse Tour ended. Welcome back to normal view!');
+}
+
 // Enhanced planet interaction
 function onMouseClick(event) {
   if (event.target.closest('.controls') || 
@@ -2467,18 +2864,7 @@ function onMouseClick(event) {
     
     // Check if it's the sun
     if (intersectedObject === sun) {
-      // Show info card for Sun, do NOT lock/follow camera
-      showPlanetInfoCard({
-        name: 'Sun',
-        type: 'star',
-        info: 'The Sun is the star at the center of the Solar System.',
-        size: 5,
-        color: 0xffff00,
-        texture: 'sun.jpg',
-        speed: 0,
-        moons: [],
-        orbit: null
-      }, -1);
+      followSun();
       return;
     }
     
