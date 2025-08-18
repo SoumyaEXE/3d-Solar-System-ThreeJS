@@ -2190,6 +2190,9 @@ function updatePlanetList() {
   const planetList = document.getElementById('planetList');
   if (!planetList) return;
 
+  // Clear existing content completely - this is crucial!
+  planetList.innerHTML = '';
+  
   const groupedBodies = {
     planet: celestialBodies.filter(b => b.type === 'planet'),
     dwarf: celestialBodies.filter(b => b.type === 'dwarf'),
