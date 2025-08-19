@@ -1468,7 +1468,7 @@ let eclipseTourActive = false;
 let eclipseTourPhase = 0;
 let eclipseTourTimer = 0;
 let eclipseType = 'solar'; // 'solar' or 'lunar'
-const eclipsePhaseDuration = 14000; // 14 seconds per phase for slower cinematic pacing
+const eclipsePhaseDuration = 12000; // 12 seconds per phase for slow cinematic pacing
 let originalEclipsePositions = {};
 let eclipseCameraPositions = [];
 let eclipseCorona = null;
@@ -1619,9 +1619,13 @@ function animate() {
       
       if (p.moons && p.moons.length > 0) {
         p.moons.forEach((moon) => {
-          const moonCinematic = eclipseTourActive ? 0.06 : 0.1;
-          const adjustedMoonSpeed = moon.speed * moonCinematic;
-          moon.pivot.rotation.y += adjustedMoonSpeed * realTimeMultiplier;
+          // During eclipse tours, moon positioning is handled by positionForEclipse() - don't animate orbits
+          if (!eclipseTourActive) {
+            const moonCinematic = 0.1;
+            const adjustedMoonSpeed = moon.speed * moonCinematic;
+            moon.pivot.rotation.y += adjustedMoonSpeed * realTimeMultiplier;
+          }
+          // Allow moon self-rotation during eclipse tours but slower
           moon.mesh.rotation.y += 0.02 * realTimeMultiplier * (eclipseTourActive ? 0.6 : 1.0);
         });
       }
@@ -1816,7 +1820,7 @@ if (resetBtn) {
   });
 }
 
-// Eclipse Tour buttons
+// Eclipse Tour Event Listeners
 const solarEclipseTourBtn = document.getElementById('solarEclipseTourBtn');
 const lunarEclipseTourBtn = document.getElementById('lunarEclipseTourBtn');
 
