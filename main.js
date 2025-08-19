@@ -48,39 +48,6 @@ controls.rotateSpeed = 0.3;
 controls.zoomSpeed = 0.8;
 controls.panSpeed = 0.5;
 
-// Mobile-specific controls
-function setupMobileControls() {
-  if (window.innerWidth <= 768) {
-    // Mobile device detected - adjust controls for touch
-    controls.rotateSpeed = 0.5; // Slightly faster rotation for touch
-    controls.zoomSpeed = 1.2; // Faster zoom for pinch gestures
-    controls.panSpeed = 0.8; // Better panning for touch
-    controls.enableKeys = false; // Disable keyboard controls on mobile
-    controls.screenSpacePanning = true; // Better touch panning
-    
-    // Prevent right-click context menu on mobile
-    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-    
-    // Disable zoom on double-tap to prevent UI jumping
-    renderer.domElement.style.touchAction = 'pan-x pan-y';
-  } else {
-    // Desktop controls
-    controls.rotateSpeed = 0.3;
-    controls.zoomSpeed = 0.8;
-    controls.panSpeed = 0.5;
-    controls.enableKeys = true;
-    controls.screenSpacePanning = false;
-  }
-}
-
-// Setup mobile controls initially
-setupMobileControls();
-
-// Re-setup controls on window resize
-window.addEventListener('resize', () => {
-  setupMobileControls();
-});
-
 // Texture Loader
 const loader = new THREE.TextureLoader();
 loader.manager.onLoad = () => console.log("All textures loaded!");
@@ -1482,7 +1449,7 @@ const distantStars = createDistantStars();
 
 // Animation variables
 let frameCount = 0;
-let animationSpeed = 0.3;
+let animationSpeed = 0.4;
 let isPaused = false;
 let currentDate = new Date();
 let timePerFrame = 1000 * 60 * 60 * 24;
@@ -3114,74 +3081,12 @@ controls.target.set(0, 0, 0);
 // Set initial camera position
 camera.position.set(0, 30, 70);
 
-// Handle resizing with mobile optimization
+// Handle resizing
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
   composer.setSize(window.innerWidth, window.innerHeight);
-  
-  // Mobile-specific adjustments
-  if (window.innerWidth <= 768) {
-    // Adjust pixel ratio for mobile performance
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-  } else {
-    // Full quality for desktop
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  }
-  
   updatePlanetLabels();
   updateMoonLabels();
 });
-
-// Mobile-specific touch handling and optimizations
-function initMobileOptimizations() {
-  if (window.innerWidth <= 768) {
-    // Disable context menu on mobile
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-    
-    // Prevent zoom on double-tap
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
-    
-    // Prevent pinch zoom
-    document.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 1) {
-        // Allow pinch zoom only on the canvas for 3D navigation
-        if (e.target === renderer.domElement) {
-          return;
-        }
-        e.preventDefault();
-      }
-    }, { passive: false });
-    
-    // Improve touch scrolling for UI panels
-    const panels = document.querySelectorAll('.celestial-content, .control-content, .planet-info-content');
-    panels.forEach(panel => {
-      panel.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-      });
-      
-      panel.addEventListener('touchmove', (e) => {
-        e.stopPropagation();
-      });
-    });
-    
-    // Optimize renderer for mobile
-    renderer.shadowMap.enabled = false; // Disable shadows on mobile for performance
-    
-    console.log('Mobile optimizations enabled');
-  }
-}
-
-// Initialize mobile optimizations
-initMobileOptimizations();
-
-// Re-initialize on resize
-window.addEventListener('resize', initMobileOptimizations);
