@@ -5,10 +5,6 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { Lensflare, LensflareElement } from "three/examples/jsm/objects/Lensflare.js";
-import { inject } from '@vercel/analytics';
-
-// Initialize Vercel Analytics
-inject();
 
 // NASA API Key for real-time planet data
 const NASA_API_KEY = "CH3TuB34hg317ulEggcZCMlKgCCPYQeTzdzJDNCz";
@@ -26,13 +22,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 // Renderer
-const renderer = new THREE.WebGLRenderer({ 
-  antialias: true,
-  alpha: true,
-  powerPreference: "high-performance",
-  stencil: false,
-  depth: true
-});
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -40,8 +30,6 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-// Enable additional anti-aliasing features
-renderer.capabilities.logarithmicDepthBuffer = true;
 document.body.appendChild(renderer.domElement);
 
 // Controls
@@ -1396,12 +1384,9 @@ celestialBodies.forEach((body) => {
   });
 });
 
-// Post-processing with improved anti-aliasing
+// Post-processing
 const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-renderPass.clearColor = new THREE.Color(0x000000);
-renderPass.clearAlpha = 0;
-composer.addPass(renderPass);
+composer.addPass(new RenderPass(scene, camera));
 
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -1623,13 +1608,9 @@ function animate() {
       
       if (p.moons && p.moons.length > 0) {
         p.moons.forEach((moon) => {
-          // During eclipse tours, moon positioning is handled by positionForEclipse() - don't animate orbits
-          if (!eclipseTourActive) {
-            const moonCinematic = 0.1;
-            const adjustedMoonSpeed = moon.speed * moonCinematic;
-            moon.pivot.rotation.y += adjustedMoonSpeed * realTimeMultiplier;
-          }
-          // Allow moon self-rotation during eclipse tours but slower
+          const moonCinematic = eclipseTourActive ? 0.06 : 0.1;
+          const adjustedMoonSpeed = moon.speed * moonCinematic;
+          moon.pivot.rotation.y += adjustedMoonSpeed * realTimeMultiplier;
           moon.mesh.rotation.y += 0.02 * realTimeMultiplier * (eclipseTourActive ? 0.6 : 1.0);
         });
       }
@@ -1685,17 +1666,12 @@ function animate() {
   const minDistance = 10;
   const normalizedDistance = Math.max(0, Math.min(1, (distanceToSun - minDistance) / (maxDistance - minDistance)));
   
-  // Prevent automatic bloom changes during eclipse tours
-  if (bloomPass && !isBloomManual && !eclipseTourActive) {
+  if (bloomPass && !isBloomManual) {
     bloomPass.strength = 0.5 + (1 - normalizedDistance) * 1.0;
     bloomPass.radius = 0.6 + (1 - normalizedDistance) * 0.4;
   } else if (bloomPass && isBloomManual) {
     bloomPass.strength = manualBloomStrength;
     bloomPass.radius = 0.6 + (1 - normalizedDistance) * 0.2;
-  } else if (bloomPass && eclipseTourActive && !isBloomManual) {
-    // Keep bloom stable during eclipse tours
-    bloomPass.strength = 0.5;
-    bloomPass.radius = 0.6;
   }
   
   try {
@@ -1824,7 +1800,7 @@ if (resetBtn) {
   });
 }
 
-// Eclipse Tour Event Listeners
+// Eclipse Tour buttons
 const solarEclipseTourBtn = document.getElementById('solarEclipseTourBtn');
 const lunarEclipseTourBtn = document.getElementById('lunarEclipseTourBtn');
 
