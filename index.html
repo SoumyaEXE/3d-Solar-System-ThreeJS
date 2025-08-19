@@ -401,6 +401,81 @@
       opacity: 0.8;
     }
 
+    /* Language Selector Styles */
+    .language-selector {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel-bg);
+      color: var(--nasa-white);
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
+      padding: 8px;
+      font-family: 'Titillium Web', sans-serif;
+      z-index: 1002;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .language-selector label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--star-gold);
+      margin: 0;
+    }
+
+    .language-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .lang-btn {
+      background: var(--button-secondary);
+      color: var(--nasa-white);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 9px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .lang-btn:hover {
+      background: var(--button-hover);
+      box-shadow: 0 0 8px rgba(11, 61, 145, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
+      border-color: var(--star-gold);
+      box-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+    }
+
+    .lang-btn.active:hover {
+      background: linear-gradient(135deg, #ffa000, var(--star-gold));
+      transform: translateY(-1px);
+    }
+
+    /* Globe icon for language selector */
+    .language-icon {
+      font-size: 12px;
+      margin-right: 2px;
+    }
+
     /* Planet name labels in 3D space */
     .planet-label {
       position: absolute;
@@ -548,6 +623,32 @@
         width: 45px;
         height: 45px;
         font-size: 16px;
+      }
+
+      .language-selector {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px;
+        gap: 6px;
+      }
+
+      .lang-btn {
+        padding: 3px 6px;
+        font-size: 8px;
+        min-width: 25px;
+      }
+
+      .controls {
+        top: 60px;
+        left: 10px;
+        min-width: 160px;
+      }
+
+      .celestial-panel {
+        top: 60px;
+        right: 10px;
+        min-width: 160px;
       }
     }
 
@@ -1054,6 +1155,16 @@
   <!-- Show UI Button (hidden by default) -->
   <button id="showUIBtn">Show UI</button>
 
+  <!-- Language Selector -->
+  <div class="language-selector">
+    <span class="language-icon">🌐</span>
+    <label>Language</label>
+    <div class="language-buttons">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+  </div>
+
   <div class="controls collapsed" id="uiControls">
     <div class="control-header" onclick="toggleControlPanel()">
       <h3>Mission Control <span class="control-toggle-icon">►</span></h3>
@@ -1168,7 +1279,7 @@
       <div class="info-section">
         <div class="info-grid">
           <div class="info-item">
-            <div class="info-item-label">Orbital Period</div>
+            <div class="info-item-label">${t('ui.planetInfo.orbitalPeriod')}</div>
             <div class="info-item-value" id="orbitalPeriod">29 years</div>
           </div>
           <div class="info-item">
@@ -1321,6 +1432,7 @@
       }
     }
 
+<<<<<<< HEAD
     function toggleSpecialEventsPanel() {
       const panel = document.getElementById('specialEventsControls');
       const icon = panel.querySelector('.control-toggle-icon');
@@ -1388,6 +1500,32 @@
     // Update position on page load and resize
     window.addEventListener('load', updateSpecialEventsPanelPosition);
     window.addEventListener('resize', updateSpecialEventsPanelPosition);
+=======
+    // Language selector functionality
+    document.addEventListener('DOMContentLoaded', () => {
+      const langButtons = document.querySelectorAll('.lang-btn');
+      
+      langButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all buttons
+          langButtons.forEach(btn => btn.classList.remove('active'));
+          
+          // Add active class to clicked button
+          button.classList.add('active');
+          
+          // Get selected language
+          const selectedLang = button.getAttribute('data-lang');
+          
+          // Call language switch function (this will be implemented in main.js)
+          if (window.switchLanguage) {
+            window.switchLanguage(selectedLang);
+          }
+          
+          console.log(`Language switched to: ${selectedLang}`);
+        });
+      });
+    });
+>>>>>>> 8bfe77d (added translations in french)
   </script>
 </body>
 </html>
