@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>3D Solar System Explorer | Soumya</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +64,7 @@
       min-width: 180px;
       max-height: 350px;
       overflow: hidden;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       font-size: 11px;
       font-family: 'Titillium Web', sans-serif;
     }
@@ -116,7 +117,8 @@
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: translateZ(0); /* Enable hardware acceleration */
     }
 
     .follow-planet-btn {
@@ -131,16 +133,17 @@
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       width: 100%;
       margin-top: 15px;
       box-shadow: 0 4px 15px rgba(255, 214, 10, 0.3);
+      transform: translateZ(0); /* Enable hardware acceleration */
     }
 
     .follow-planet-btn:hover {
       background: linear-gradient(135deg, #ffa000, var(--star-gold));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 214, 10, 0.5);
+      transform: translateY(-3px) translateZ(0);
+      box-shadow: 0 8px 25px rgba(255, 214, 10, 0.5);
     }
 
     .follow-planet-btn.following {
@@ -198,13 +201,13 @@
 
     .control-toggle-icon {
       font-size: 14px;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .control-content {
       max-height: 300px;
       overflow-y: auto;
-      transition: max-height 0.3s ease;
+      transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       padding: 8px;
     }
 
@@ -243,11 +246,12 @@
       border-radius: 6px;
       border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
       min-width: 180px;
       max-height: 350px;
       overflow: hidden;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       font-family: 'Titillium Web', sans-serif;
     }
 
@@ -257,6 +261,8 @@
       border-bottom: 1px solid var(--panel-border);
       cursor: pointer;
       user-select: none;
+      -webkit-user-select: none;
+      transition: background 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .celestial-header h4 {
@@ -274,13 +280,13 @@
 
     .toggle-icon {
       font-size: 16px;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .celestial-content {
       max-height: 290px;
       overflow-y: auto;
-      transition: max-height 0.3s ease;
+      transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .celestial-panel.collapsed .celestial-content {
@@ -312,13 +318,15 @@
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       width: 100%;
+      transform: translateZ(0); /* Enable hardware acceleration */
     }
 
     .label-toggle:hover {
       background: var(--button-hover);
       box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
+      transform: translateY(-1px) translateZ(0);
     }
 
     .label-toggle.active {
@@ -331,14 +339,16 @@
       padding: 8px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       font-size: 11px;
       font-family: 'Titillium Web', sans-serif;
+      transform: translateZ(0); /* Enable hardware acceleration */
     }
     
     .planet-item:hover {
       background: rgba(255, 214, 10, 0.1);
-      transform: translateX(3px);
+      transform: translateX(5px) translateZ(0);
+      box-shadow: 0 2px 8px rgba(255, 214, 10, 0.2);
     }
 
     .planet-item strong {
@@ -451,11 +461,25 @@
       border-radius: 2px;
     }
 
-    /* Special Events Panel - positioned on the right side */
+    /* Special Events Panel - positioned directly below Celestial Bodies panel */
     #specialEventsControls {
-      right: 15px;
+      position: absolute;
+      right: 15px; /* Initial position, will be updated by JavaScript */
       left: auto;
-      top: 390px; /* Position below Celestial Bodies panel */
+      top: 380px; /* Initial position, will be updated by JavaScript */
+      background: var(--panel-bg);
+      color: var(--nasa-white);
+      border-radius: 6px;
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
+      min-width: 180px;
+      max-height: 350px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      font-size: 11px;
+      font-family: 'Titillium Web', sans-serif;
     }
 
     /* UI Hide/Show functionality */
@@ -463,6 +487,7 @@
       opacity: 0;
       pointer-events: none;
       transform: translateY(-20px);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     /* Floating Music Control */
@@ -515,6 +540,224 @@
         width: 45px;
         height: 45px;
         font-size: 16px;
+      }
+    }
+
+    /* Comprehensive Mobile Responsiveness */
+    @media (max-width: 768px) {
+      /* Control panels - make them more mobile friendly */
+      .controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: auto;
+        min-width: 160px;
+        max-width: calc(100vw - 20px);
+        max-height: 40vh;
+        font-size: 10px;
+        z-index: 1000;
+      }
+
+      .control-group {
+        margin-bottom: 4px;
+      }
+
+      .control-group button {
+        padding: 4px 6px;
+        font-size: 8px;
+        margin-right: 2px;
+        margin-bottom: 2px;
+      }
+
+      .control-group input[type="range"] {
+        height: 4px;
+      }
+
+      /* Celestial panel mobile adjustments */
+      .celestial-panel {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        left: auto;
+        min-width: 160px;
+        max-width: calc(100vw - 20px);
+        max-height: 45vh;
+        font-size: 10px;
+        z-index: 999;
+      }
+
+      .planet-item {
+        padding: 6px 8px;
+        font-size: 10px;
+      }
+
+      .label-toggle {
+        padding: 3px 6px;
+        font-size: 9px;
+      }
+
+      /* Special Events panel mobile */
+      #specialEventsControls {
+        position: fixed;
+        top: auto;
+        bottom: 120px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+        width: calc(100vw - 20px);
+        font-size: 10px;
+        z-index: 998;
+      }
+
+      /* Info panel mobile */
+      .info {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        font-size: 9px;
+        padding: 8px;
+      }
+
+      /* Planet info card mobile */
+      .planet-info-card {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        min-width: auto;
+        max-width: none;
+        width: calc(100vw - 20px);
+        height: calc(100vh - 20px);
+        max-height: calc(100vh - 20px);
+        transform: none;
+      }
+
+      .planet-info-content {
+        max-height: calc(100vh - 100px);
+        font-size: 12px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .info-item {
+        padding: 8px;
+      }
+
+      /* Eclipse tour info mobile */
+      .eclipse-tour-info {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        width: calc(100vw - 20px);
+        max-width: none;
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+
+      .eclipse-info-content h3 {
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+
+      .eclipse-phase-desc {
+        font-size: 10px;
+        line-height: 1.2;
+      }
+
+      /* Footer mobile */
+      .nasa-footer {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        left: auto;
+        padding: 3px 6px;
+      }
+
+      .footer-content {
+        font-size: 9px;
+      }
+
+      /* Show UI button mobile */
+      #showUIBtn {
+        top: 10px;
+        right: 10px;
+        padding: 6px 8px;
+        font-size: 10px;
+      }
+
+      /* Follow buttons mobile */
+      .follow-planet-btn {
+        padding: 8px 12px;
+        font-size: 10px;
+      }
+
+      .follow-sun-btn {
+        padding: 4px 8px;
+        font-size: 9px;
+      }
+
+      /* Tour buttons mobile */
+      .tour-btn {
+        padding: 6px 8px;
+        font-size: 9px;
+      }
+
+      /* Make sure panels don't overlap on very small screens */
+      @media (max-height: 600px) {
+        .controls {
+          max-height: 30vh;
+        }
+        
+        .celestial-panel {
+          max-height: 35vh;
+        }
+        
+        #specialEventsControls {
+          bottom: 80px;
+        }
+        
+        .info {
+          display: none; /* Hide info panel on very small screens */
+        }
+      }
+
+      /* Touch-friendly interactions */
+      .control-group button,
+      .label-toggle,
+      .planet-item,
+      .tour-btn {
+        min-height: 32px; /* Minimum touch target size */
+        touch-action: manipulation;
+      }
+
+      /* Prevent text selection on mobile */
+      * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Allow text selection only in content areas */
+      .planet-description,
+      .eclipse-phase-desc,
+      .info-item-value,
+      input {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
       }
     }
 
@@ -867,12 +1110,12 @@
   transform: translateX(-50%);
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.75), rgba(10, 10, 30, 0.6));
   border: 1px solid rgba(255,214,10,0.12);
-  border-radius: 12px;
-  padding: 14px 18px;
+  border-radius: 8px;
+  padding: 10px 12px;
   text-align: left;
-  z-index: 1000;
-  width: min(1100px, 92%);
-  max-width: 1100px;
+  z-index: 2000;
+  width: min(700px, 85%);
+  max-width: 700px;
   backdrop-filter: blur(6px);
   box-shadow: 0 6px 30px rgba(0,0,0,0.6);
     }
@@ -880,25 +1123,25 @@
     .eclipse-info-content h3 {
       font-family: 'Orbitron', monospace;
       color: var(--star-gold);
-      margin: 0 0 15px 0;
-      font-size: 20px;
+      margin: 0 0 8px 0;
+      font-size: 16px;
       text-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
     }
 
     .eclipse-phase-title {
       font-family: 'Orbitron', monospace;
       color: var(--nasa-white);
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
 
     .eclipse-phase-desc {
       font-family: 'Titillium Web', sans-serif;
       color: var(--nasa-gray);
-      font-size: 14px;
-      margin-bottom: 15px;
-      line-height: 1.4;
+      font-size: 12px;
+      margin-bottom: 10px;
+      line-height: 1.3;
     }
 
     .eclipse-progress-bar {
@@ -1028,8 +1271,8 @@
     <div class="control-content">
       <div class="control-group">
         <label>Speed (Earth Time)</label>
-        <input type="range" id="speedControl" min="0" max="10" step="0.1" value="0.4">
-        <span id="speedValue" class="value-display">0.4x Slow</span>
+        <input type="range" id="speedControl" min="0" max="10" step="0.1" value="0.3">
+        <span id="speedValue" class="value-display">0.3x Slow</span>
       </div>
       
       <div class="control-group">
@@ -1227,7 +1470,7 @@
   <!-- Footer -->
   <footer class="nasa-footer">
     <div class="footer-content">
-      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya and Subarna</a> & Copilot 2025
+      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya</a> X <a href="https://github.com/Dronzer2Code" target="_blank" rel="noopener noreferrer">Subarna</a>
     </div>
   </footer>
   
@@ -1266,6 +1509,12 @@
       } else {
         icon.textContent = '▼';
       }
+      
+      // Immediately update Special Events panel position when celestial panel changes
+      updateSpecialEventsPanelPosition();
+      
+      // Also update after animation completes for smooth positioning
+      setTimeout(updateSpecialEventsPanelPosition, 400);
     }
 
     function toggleControlPanel() {
@@ -1294,7 +1543,61 @@
       } else {
         icon.textContent = '▼';
       }
+      
+      // Update position after toggle
+      updateSpecialEventsPanelPosition();
     }
+    
+    function updateSpecialEventsPanelPosition() {
+      const celestialPanel = document.getElementById('celestialPanel');
+      const specialEventsPanel = document.getElementById('specialEventsControls');
+      
+      if (celestialPanel && specialEventsPanel) {
+        const celestialRect = celestialPanel.getBoundingClientRect();
+        const isCollapsed = celestialPanel.classList.contains('collapsed');
+        
+        // Align the Special Events panel exactly with the celestial panel
+        const celestialLeft = celestialRect.left + window.scrollX;
+        const celestialWidth = celestialRect.width;
+        
+        let topPosition;
+        if (isCollapsed) {
+          // When collapsed, position right below with minimal gap
+          topPosition = celestialRect.bottom + window.scrollY + 5;
+        } else {
+          // When expanded, position only halfway down to avoid Earth area
+          const celestialTop = celestialRect.top + window.scrollY;
+          const celestialHeight = celestialRect.height;
+          topPosition = celestialTop + (celestialHeight * 0.6) + 15; // 60% down + small gap
+        }
+        
+        specialEventsPanel.style.top = topPosition + 'px';
+        specialEventsPanel.style.left = celestialLeft + 'px';
+        specialEventsPanel.style.width = celestialWidth + 'px';
+        specialEventsPanel.style.right = 'auto'; // Remove right positioning
+      }
+    }
+    
+    function toggleCelestialPanel() {
+      const panel = document.getElementById('celestialPanel');
+      const icon = panel.querySelector('.toggle-icon');
+      
+      panel.classList.toggle('collapsed');
+      
+      // Update icon based on state
+      if (panel.classList.contains('collapsed')) {
+        icon.textContent = '►';
+      } else {
+        icon.textContent = '▼';
+      }
+      
+      // Update Special Events panel position after celestial panel changes
+      setTimeout(updateSpecialEventsPanelPosition, 300); // Wait for animation
+    }
+    
+    // Update position on page load and resize
+    window.addEventListener('load', updateSpecialEventsPanelPosition);
+    window.addEventListener('resize', updateSpecialEventsPanelPosition);
   </script>
 </body>
 </html>
