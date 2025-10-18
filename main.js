@@ -9,6 +9,16 @@ import { Lensflare, LensflareElement } from "three/examples/jsm/objects/Lensflar
 // NASA API Key for real-time planet data
 const NASA_API_KEY = "CH3TuB34hg317ulEggcZCMlKgCCPYQeTzdzJDNCz";
 
+// Expose environment configuration for UI scripts (e.g., chatbot Gemini integration)
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? "";
+
+if (typeof window !== "undefined") {
+  window.__APP_ENV = {
+    ...(window.__APP_ENV || {}),
+    GEMINI_API_KEY,
+  };
+}
+
 // Scene and Camera Setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000814);

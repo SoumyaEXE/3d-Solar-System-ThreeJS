@@ -2,18 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Amazing 3D Solar System</title>
+  <title>3D Solar System Explorer | Soumya</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZJZCRLTY3L"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZJZCRLTY3L');
+</script>
   <style>
     :root {
+      /* NASA Official Colors */
       --nasa-blue: #0b3d91;
       --nasa-red: #fc3d21;
-      --nasa-gray: #5a6670;
-      --space-black: #000814;
+      --nasa-white: #ffffff;
+      --nasa-gray: #e5e5e5;
+      --nasa-dark-gray: #5a6670;
+      --nasa-black: #000000;
+      
+      /* Space Themed Colors */
+      --deep-space: #000814;
       --cosmic-blue: #001d3d;
-      --star-white: #ffd60a;
+      --star-gold: #ffd60a;
+      --nebula-purple: #7209b7;
+      --comet-blue: #4cc9f0;
+      --asteroid-orange: #f77f00;
+      --planet-green: #2a9d8f;
+      --ring-saturn: #e9c46a;
+      
+      /* UI Colors */
+      --panel-bg: rgba(11, 61, 145, 0.85);
+      --panel-border: rgba(255, 214, 10, 0.3);
+      --button-primary: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      --button-secondary: linear-gradient(135deg, var(--nasa-dark-gray), #404040);
+      --button-active: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      --button-hover: linear-gradient(135deg, var(--nasa-blue), #0a2a66);
     }
 
     * {
@@ -23,29 +51,30 @@
     body { 
       margin: 0; 
       overflow: hidden; 
-      background: var(--space-black); 
-      font-family: 'Rajdhani', monospace;
-      color: white;
+      background: var(--deep-space); 
+      font-family: 'Titillium Web', sans-serif;
+      color: var(--nasa-gray);
     }
     
     canvas { display: block; }
     
-    /* Mission Control panel - matching celestial bodies style */
+    /* Mission Control panel - NASA themed */
     .controls {
       position: absolute;
       top: 15px;
       left: 15px;
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
+      background: var(--panel-bg);
+      color: var(--nasa-white);
       border-radius: 6px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
       min-width: 180px;
       max-height: 350px;
       overflow: hidden;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       font-size: 11px;
+      font-family: 'Titillium Web', sans-serif;
     }
     
     .control-group {
@@ -56,10 +85,11 @@
       display: block;
       margin-bottom: 2px;
       font-size: 10px;
-      color: #ccc;
+      color: var(--nasa-gray);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-family: 'Titillium Web', sans-serif;
     }
     
     .control-group input[type="range"] {
@@ -75,15 +105,15 @@
       appearance: none;
       width: 10px;
       height: 10px;
-      background: var(--star-white);
+      background: var(--star-gold);
       border-radius: 50%;
       cursor: pointer;
       box-shadow: 0 0 6px rgba(255, 214, 10, 0.5);
     }
     
     .control-group button {
-      background: linear-gradient(135deg, var(--nasa-gray), #404040);
-      color: white;
+      background: var(--button-secondary);
+      color: var(--nasa-white);
       border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 3px 6px;
       border-radius: 3px;
@@ -91,36 +121,74 @@
       margin-right: 3px;
       margin-bottom: 2px;
       font-size: 9px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: translateZ(0); /* Enable hardware acceleration */
+    }
+
+    .follow-planet-btn {
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
+      border: 2px solid var(--star-gold);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      width: 100%;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(255, 214, 10, 0.3);
+      transform: translateZ(0); /* Enable hardware acceleration */
+    }
+
+    .follow-planet-btn:hover {
+      background: linear-gradient(135deg, #ffa000, var(--star-gold));
+      transform: translateY(-3px) translateZ(0);
+      box-shadow: 0 8px 25px rgba(255, 214, 10, 0.5);
+    }
+
+    .follow-planet-btn.following {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      color: var(--nasa-white);
+      border-color: var(--nasa-red);
+      box-shadow: 0 4px 15px rgba(252, 61, 33, 0.3);
+    }
+
+    .follow-planet-btn.following:hover {
+      background: linear-gradient(135deg, #d32f2f, var(--nasa-red));
+      box-shadow: 0 6px 20px rgba(252, 61, 33, 0.5);
     }
     
     .control-group button:hover {
-      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      background: var(--button-hover);
       box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
       transform: translateY(-1px);
     }
     
     .control-group button.active {
-      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      background: var(--button-active);
       box-shadow: 0 0 10px rgba(252, 61, 33, 0.5);
     }
 
     .value-display {
       font-family: 'Orbitron', monospace;
       font-size: 9px;
-      color: var(--star-white);
+      color: var(--star-gold);
       font-weight: 500;
     }
 
-    /* Control panel header - matching celestial style */
+    /* Control panel header - NASA themed */
     .control-header {
       padding: 8px;
       background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
-      border-bottom: 1px solid rgba(255, 214, 10, 0.3);
+      border-bottom: 1px solid var(--panel-border);
       cursor: pointer;
       user-select: none;
       transition: all 0.3s ease;
@@ -131,7 +199,7 @@
       font-family: 'Orbitron', monospace;
       font-weight: 700;
       font-size: 11px;
-      color: white;
+      color: var(--nasa-white);
       text-transform: uppercase;
       letter-spacing: 1px;
       display: flex;
@@ -141,13 +209,13 @@
 
     .control-toggle-icon {
       font-size: 14px;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .control-content {
       max-height: 300px;
       overflow-y: auto;
-      transition: max-height 0.3s ease;
+      transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       padding: 8px;
     }
 
@@ -165,14 +233,14 @@
       position: absolute;
       bottom: 15px;
       left: 15px;
-      background: linear-gradient(135deg, rgba(0, 8, 20, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
+      background: rgba(0, 29, 61, 0.85);
+      color: var(--nasa-white);
       padding: 10px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
       font-size: 10px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       max-width: 200px;
     }
     
@@ -181,24 +249,28 @@
       position: absolute;
       top: 15px;
       right: 15px;
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
+      background: var(--panel-bg);
+      color: var(--nasa-white);
       border-radius: 6px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
       min-width: 180px;
       max-height: 350px;
       overflow: hidden;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      font-family: 'Titillium Web', sans-serif;
     }
 
     .celestial-header {
       padding: 8px;
       background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
-      border-bottom: 1px solid rgba(255, 214, 10, 0.3);
+      border-bottom: 1px solid var(--panel-border);
       cursor: pointer;
       user-select: none;
+      -webkit-user-select: none;
+      transition: background 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .celestial-header h4 {
@@ -206,7 +278,7 @@
       font-family: 'Orbitron', monospace;
       font-weight: 700;
       font-size: 13px;
-      color: white;
+      color: var(--nasa-white);
       text-transform: uppercase;
       letter-spacing: 1px;
       display: flex;
@@ -216,13 +288,13 @@
 
     .toggle-icon {
       font-size: 16px;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .celestial-content {
       max-height: 290px;
       overflow-y: auto;
-      transition: max-height 0.3s ease;
+      transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .celestial-panel.collapsed .celestial-content {
@@ -243,29 +315,31 @@
     }
 
     .label-toggle {
-      background: linear-gradient(135deg, var(--nasa-gray), #404040);
-      color: white;
+      background: var(--button-secondary);
+      color: var(--nasa-white);
       border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 4px 8px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 10px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       width: 100%;
+      transform: translateZ(0); /* Enable hardware acceleration */
     }
 
     .label-toggle:hover {
-      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      background: var(--button-hover);
       box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
+      transform: translateY(-1px) translateZ(0);
     }
 
     .label-toggle.active {
-      background: linear-gradient(135deg, var(--star-white), #ffa000);
-      color: var(--space-black);
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
       box-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
     }
     
@@ -273,13 +347,16 @@
       padding: 8px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       font-size: 11px;
+      font-family: 'Titillium Web', sans-serif;
+      transform: translateZ(0); /* Enable hardware acceleration */
     }
     
     .planet-item:hover {
       background: rgba(255, 214, 10, 0.1);
-      transform: translateX(3px);
+      transform: translateX(5px) translateZ(0);
+      box-shadow: 0 2px 8px rgba(255, 214, 10, 0.2);
     }
 
     .planet-item strong {
@@ -293,20 +370,20 @@
     }
 
     .planet-item.dwarf strong {
-      color: var(--star-white);
+      color: var(--star-gold);
     }
 
     .planet-item.asteroid strong {
-      color: #ff8c42;
+      color: var(--asteroid-orange);
     }
 
     .planet-item.tno strong {
-      color: #ff6b9d;
+      color: var(--nebula-purple);
     }
 
     .category-header {
       background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
-      color: white;
+      color: var(--nasa-white);
       padding: 6px 12px;
       margin: 8px 0 4px 0;
       font-family: 'Orbitron', monospace;
@@ -315,11 +392,11 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       border-radius: 4px;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      border: 1px solid var(--panel-border);
     }
 
     .planet-item small {
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-weight: 400;
       opacity: 0.8;
     }
@@ -328,7 +405,7 @@
     .planet-label {
       position: absolute;
       background: rgba(11, 61, 145, 0.9);
-      color: white;
+      color: var(--nasa-white);
       padding: 2px 6px;
       border-radius: 3px;
       font-family: 'Orbitron', monospace;
@@ -347,10 +424,10 @@
     .moon-label {
       position: absolute;
       background: rgba(252, 61, 33, 0.9);
-      color: white;
+      color: var(--nasa-white);
       padding: 1px 4px;
       border-radius: 2px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-size: 8px;
       font-weight: 500;
       text-transform: uppercase;
@@ -373,7 +450,7 @@
     }
 
     .celestial-content::-webkit-scrollbar-thumb {
-      background: var(--star-white);
+      background: var(--star-gold);
       border-radius: 2px;
     }
 
@@ -388,8 +465,29 @@
     }
 
     .control-content::-webkit-scrollbar-thumb {
-      background: var(--star-white);
+      background: var(--star-gold);
       border-radius: 2px;
+    }
+
+    /* Special Events Panel - positioned directly below Celestial Bodies panel */
+    #specialEventsControls {
+      position: absolute;
+      right: 15px; /* Initial position, will be updated by JavaScript */
+      left: auto;
+      top: 380px; /* Initial position, will be updated by JavaScript */
+      background: var(--panel-bg);
+      color: var(--nasa-white);
+      border-radius: 6px;
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(11, 61, 145, 0.3);
+      min-width: 180px;
+      max-height: 350px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      font-size: 11px;
+      font-family: 'Titillium Web', sans-serif;
     }
 
     /* UI Hide/Show functionality */
@@ -397,6 +495,7 @@
       opacity: 0;
       pointer-events: none;
       transform: translateY(-20px);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     /* Floating Music Control */
@@ -413,9 +512,9 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      border: 2px solid var(--nasa-gold);
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: var(--star-white);
+      border: 2px solid var(--star-gold);
+      background: var(--panel-bg);
+      color: var(--star-gold);
       font-size: 18px;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -424,6 +523,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: 'Titillium Web', sans-serif;
     }
 
     .floating-music-btn:hover {
@@ -455,12 +555,12 @@
       position: absolute;
       top: 15px;
       right: 15px;
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.9), rgba(0, 29, 61, 0.9));
-      color: white;
-      border: 1px solid rgba(255, 214, 10, 0.3);
+      background: var(--panel-bg);
+      color: var(--nasa-white);
+      border: 1px solid var(--panel-border);
       border-radius: 6px;
       padding: 8px 12px;
-      font-family: 'Rajdhani', monospace;
+      font-family: 'Titillium Web', sans-serif;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -474,6 +574,442 @@
     #showUIBtn:hover {
       background: linear-gradient(135deg, rgba(252, 61, 33, 0.9), rgba(11, 61, 145, 0.9));
       transform: scale(1.05);
+    }
+
+    /* Planet Information Card */
+    .planet-info-card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, var(--panel-bg), rgba(11, 61, 145, 0.95));
+      color: var(--nasa-white);
+      border-radius: 12px;
+      border: 2px solid var(--panel-border);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(11, 61, 145, 0.4);
+      min-width: 400px;
+      max-width: 500px;
+      max-height: 80vh;
+      z-index: 2000;
+      font-family: 'Titillium Web', sans-serif;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .planet-info-header {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      padding: 15px 20px;
+      border-radius: 10px 10px 0 0;
+      border-bottom: 2px solid var(--panel-border);
+      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 2001;
+    }
+
+    .planet-info-title {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--nasa-white);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .planet-type-badge {
+      background: rgba(255, 214, 10, 0.9);
+      color: var(--nasa-black);
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--nasa-white);
+      font-size: 24px;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .planet-info-content {
+      padding: 20px;
+      max-height: calc(80vh - 80px);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Custom scrollbar for planet info card */
+    .planet-info-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .planet-info-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .planet-info-content::-webkit-scrollbar-thumb {
+      background: var(--star-gold);
+      border-radius: 2px;
+    }
+
+    .info-section {
+      margin-bottom: 20px;
+    }
+
+    .info-section h4 {
+      margin: 0 0 10px 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--star-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 5px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .info-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 214, 10, 0.2);
+    }
+
+    .info-item-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--star-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .info-item-value {
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--nasa-white);
+    }
+
+    .planet-description {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid var(--star-gold);
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--nasa-gray);
+      margin-bottom: 15px;
+    }
+
+    .moons-section {
+      background: rgba(0, 29, 61, 0.6);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .moon-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: 'Titillium Web', sans-serif;
+    }
+
+    .moon-item:last-child {
+      border-bottom: none;
+    }
+
+    .moon-info-section {
+      flex: 1;
+    }
+
+    .moon-name {
+      font-weight: 600;
+      color: var(--nasa-white);
+      font-size: 13px;
+    }
+
+    .moon-info {
+      font-size: 11px;
+      color: var(--nasa-gray);
+      text-align: left;
+    }
+
+    .moon-follow-btn {
+      margin-left: 10px;
+    }
+
+    .follow-moon-btn {
+      background: linear-gradient(135deg, var(--comet-blue), #3498db);
+      color: var(--nasa-white);
+      border: 1px solid var(--comet-blue);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Titillium Web', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .follow-moon-btn:hover {
+      background: linear-gradient(135deg, #3498db, var(--comet-blue));
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(76, 201, 240, 0.3);
+    }
+
+    .follow-sun-btn {
+      background: linear-gradient(135deg, var(--asteroid-orange), #ff6b35);
+      color: var(--nasa-white);
+      border: 1px solid var(--asteroid-orange);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .follow-sun-btn:hover {
+      background: linear-gradient(135deg, #ff6b35, var(--asteroid-orange));
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(247, 127, 0, 0.4);
+    }
+
+    .eclipse-tour-btn {
+      background: linear-gradient(135deg, #1a1a1a, #333333);
+      color: var(--nasa-white);
+      border: 1px solid #444444;
+      padding: 3px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .eclipse-tour-btn:hover {
+      background: linear-gradient(135deg, #333333, #1a1a1a);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .eclipse-tour-btn.active {
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      border-color: #ff4444;
+      box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+    }
+
+    /* Tour button styling for Special Events panel */
+    .tour-btn {
+      background: linear-gradient(135deg, #1a1a1a, #333333);
+      color: var(--nasa-white);
+      border: 1px solid #444444;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tour-btn:hover {
+      background: linear-gradient(135deg, #333333, #1a1a1a);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .tour-btn.active {
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      border-color: #ff4444;
+      box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+    }
+
+    .eclipse-tour-info {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.75), rgba(10, 10, 30, 0.6));
+  border: 1px solid rgba(255,214,10,0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  z-index: 2000;
+  width: min(700px, 85%);
+  max-width: 700px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    }
+
+    .eclipse-info-content h3 {
+      font-family: 'Orbitron', monospace;
+      color: var(--star-gold);
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      text-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+    }
+
+    .eclipse-phase-title {
+      font-family: 'Orbitron', monospace;
+      color: var(--nasa-white);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .eclipse-phase-desc {
+      font-family: 'Titillium Web', sans-serif;
+      color: var(--nasa-gray);
+      font-size: 12px;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .eclipse-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .eclipse-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--star-gold), var(--nasa-red));
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+    }
+
+    .orbital-period-display {
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .orbital-period-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--star-gold);
+    }
+
+    .orbital-period-label {
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 11px;
+      color: var(--nasa-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controls-info {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 214, 10, 0.2);
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: 'Titillium Web', sans-serif;
+    }
+
+    .control-item:last-child {
+      border-bottom: none;
+    }
+
+    .control-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .control-text {
+      font-size: 13px;
+      color: var(--nasa-gray);
+      line-height: 1.4;
+    }
+
+    .control-text strong {
+      color: var(--nasa-white);
+      font-weight: 600;
     }
 
     /* NASA-styled Footer */
@@ -512,8 +1048,218 @@
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
       transform: scale(1.05);
     }
+
+    /* Chatbot Styles */
+    .chatbot-container {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 350px;
+      max-height: 500px;
+      background: linear-gradient(135deg, var(--panel-bg), rgba(11, 61, 145, 0.95));
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(11, 61, 145, 0.4);
+      backdrop-filter: blur(15px);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transform: translateY(0);
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-container.hidden {
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      padding: 15px;
+      border-radius: 10px 10px 0 0;
+      border-bottom: 2px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chatbot-header h3 {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--nasa-white);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .chatbot-close-btn {
+      background: none;
+      border: none;
+      color: var(--nasa-white);
+      font-size: 20px;
+      cursor: pointer;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      max-width: 80%;
+    }
+
+    .message .chatbot-bullet-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .bot-message {
+      background: rgba(0, 29, 61, 0.8);
+      color: var(--nasa-white);
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+    }
+
+    .user-message {
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      color: var(--nasa-white);
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+    }
+
+    .chatbot-input-container {
+      display: flex;
+      padding: 15px;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #chatbotInput {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 10px 15px;
+      color: var(--nasa-white);
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      outline: none;
+    }
+
+    #chatbotInput:focus {
+      border-color: var(--star-gold);
+      box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.3);
+    }
+
+    #chatbotInput::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    #sendChatbotMessage {
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    #sendChatbotMessage:hover {
+      background: linear-gradient(135deg, #ffa000, var(--star-gold));
+      transform: scale(1.05);
+    }
+
+    .chatbot-toggle-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      border: 2px solid var(--star-gold);
+      color: var(--star-gold);
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(11, 61, 145, 0.4);
+      z-index: 999;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chatbot-toggle-btn:hover {
+      background: linear-gradient(135deg, var(--cosmic-blue), var(--nasa-blue));
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(255, 214, 10, 0.4);
+    }
+
+    /* Custom scrollbar for chatbot */
+    .chatbot-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chatbot-messages::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .chatbot-messages::-webkit-scrollbar-thumb {
+      background: var(--star-gold);
+      border-radius: 2px;
+    }
+
+    /* Mobile responsiveness for chatbot */
+    @media (max-width: 768px) {
+      .chatbot-container {
+        width: calc(100% - 40px);
+        bottom: 90px;
+        right: 20px;
+      }
+      
+      .chatbot-toggle-btn {
+        bottom: 90px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+    }
   </style>
-  <script type="module" crossorigin src="/assets/index-BYVSyEDj.js"></script>
+  <script type="module" crossorigin src="/assets/index-gH4uWavU.js"></script>
 </head>
 <body>
   <!-- Show UI Button (hidden by default) -->
@@ -541,7 +1287,13 @@
         <button id="resetBtn">Reset</button>
         <button id="hideUIBtn">Hide UI</button>
       </div>
+
+      <div class="control-group">
+        <label>Camera Control</label>
+        <button id="stopFollowBtn" style="display: none;" class="active">🛑 Stop Follow</button>
+      </div>
       
+
       <div class="control-group">
         <label>Atmosphere</label>
         <button id="musicBtn">🎵 Music</button>
@@ -554,10 +1306,13 @@
         <label>Toggle</label>
         <button id="orbitsBtn" class="active">Orbits</button>
         <button id="moonsBtn" class="active">Moons</button>
+        <button id="realAsteroidsBtn" class="active">Real Asteroids</button>
+        <button id="cometsBtn" class="active">Comets</button>
       </div>
       
       <div class="control-group">
         <label>Asteroid Belts</label>
+        <button id="allAsteroidsBtn" class="active">All Belts</button>
         <button id="mainAsteroidsBtn" class="active">Main Belt</button>
         <button id="trojansBtn" class="active">Trojans</button>
         <button id="kuiperBtn" class="active">Kuiper</button>
@@ -566,15 +1321,35 @@
     </div>
   </div>
   
+  <!-- Special Events Panel -->
+  <div class="controls collapsed" id="specialEventsControls">
+    <div class="control-header" onclick="toggleSpecialEventsPanel()">
+      <h3>Special Events <span class="control-toggle-icon">►</span></h3>
+    </div>
+    <div class="control-content">
+      <div class="control-group">
+        <h4 style="margin: 5px 0; color: var(--star-gold);">Eclipse Tours</h4>
+        <button id="solarEclipseTour" class="tour-btn" style="width: 100%; margin-bottom: 8px;">
+          🌑 Solar Eclipse Tour
+        </button>
+        <button id="lunarEclipseTour" class="tour-btn" style="width: 100%;">
+          🌙 Lunar Eclipse Tour
+        </button>
+      </div>
+    </div>
+  </div>
+  
   <div class="info">
-    <strong style="font-family: 'Orbitron', monospace; color: #ffd60a;">NASA SOLAR EXPLORER</strong><br>
+    <strong style="font-family: 'Orbitron', monospace; color: var(--star-gold);">NASA SOLAR EXPLORER</strong><br>
     🪐 8 Planets<br>
     🌍 11 Dwarf Planets<br>
     ☄️ 4 Asteroid Belts<br>
     🌌 Trans-Neptunian Objects<br>
-    🌙 50+ Moons<br>
+    🙀 50+ Moons<br>
     ✨ Glowing Orbit Rings<br>
     🎵 Atmospheric Music<br>
+    🛰️ Real-time NASA Data<br>
+    <button id="followSunBtn" class="follow-sun-btn">☀️ Follow Sun</button>
   </div>
   
   <div class="celestial-panel collapsed" id="celestialPanel">
@@ -590,10 +1365,113 @@
     </div>
   </div>
   
+  <!-- Planet Information Card -->
+  <div id="planetInfoCard" class="planet-info-card">
+    <div class="planet-info-header">
+      <h2 class="planet-info-title">
+        <span id="planetIcon">🪐</span>
+        <span id="planetName">SATURN</span>
+        <span id="planetTypeBadge" class="planet-type-badge">PLANET</span>
+      </h2>
+      <button class="close-btn" id="closePlanetInfo">×</button>
+    </div>
+    <div class="planet-info-content">
+      <div class="info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-item-label">Orbital Period</div>
+            <div class="info-item-value" id="orbitalPeriod">29 years</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Size (Relative to Earth)</div>
+            <div class="info-item-value" id="sizeRelative">1.7x Earth</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Distance from Sun</div>
+            <div class="info-item-value" id="distanceFromSun">31 AU</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Discovery Year</div>
+            <div class="info-item-value" id="discoveryYear">Ancient</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="planet-description" id="planetDescription">
+          Famous for its prominent ring system. Less dense than water. Has 146 known moons.
+        </div>
+      </div>
+
+      <div class="info-section" id="moonsSection">
+        <h4>🌙 Moons (<span id="moonCount">9</span>)</h4>
+        <div class="moons-section" id="moonsContainer">
+          <!-- Moon items will be populated dynamically -->
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h4>🎮 Controls</h4>
+        <div class="controls-info">
+          <div class="control-item">
+            <div class="control-icon">🖱️</div>
+            <div class="control-text">
+              <strong>Mouse:</strong> Orbit around object
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="control-icon">🔄</div>
+            <div class="control-text">
+              <strong>Scroll:</strong> Zoom in/out
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="control-icon">⌨️</div>
+            <div class="control-text">
+              <strong>R key or Reset:</strong> Stop following
+            </div>
+          </div>
+          <div class="control-item">
+            <div class="control-icon">💫</div>
+            <div class="control-text">
+              <strong>O key:</strong> Toggle glowing orbits
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <button id="followPlanetBtn" class="follow-planet-btn">
+          🎯 FOLLOW PLANET
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eclipse Tour Info Panel (bottom, stretched) -->
+  <div id="eclipseTourInfo" class="eclipse-tour-info" style="display: none;">
+    <div class="eclipse-info-content">
+      <div style="display:flex; gap:18px; align-items:flex-start;">
+        <div style="flex:0 0 72px; font-size:40px; line-height:1;">🌒</div>
+        <div style="flex:1 1 auto;">
+          <h3 style="margin:0 0 6px 0; font-size:20px;">Solar Eclipse: Cinematic Tour</h3>
+          <div id="eclipsePhaseTitle" class="eclipse-phase-title">Phase 1: Getting Ready</div>
+          <div id="eclipsePhaseDesc" class="eclipse-phase-desc" style="margin-top:6px;">We will slowly move in so you can clearly see how the Sun, Moon and Earth line up — this helps you understand why eclipses happen. The tour is slow on purpose so you can enjoy every moment.</div>
+        </div>
+        <div style="flex:0 0 220px; display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+          <div class="eclipse-progress-bar" style="width:200px;">
+            <div id="eclipseProgress" class="eclipse-progress-fill"></div>
+          </div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.75);">Sit back — the whole tour may take a minute or two. Be patient; it's designed to teach and look beautiful.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="nasa-footer">
     <div class="footer-content">
-      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya</a> & Copilot 2025
+      Made With 💙 <a href="https://github.com/SoumyaEXE" target="_blank" rel="noopener noreferrer">Soumya</a> X <a href="https://github.com/Dronzer2Code" target="_blank" rel="noopener noreferrer">Subarna</a>
     </div>
   </footer>
   
@@ -617,6 +1495,28 @@
     Your browser does not support the audio element.
   </audio>
 
+  <!-- Chatbot Container -->
+  <div id="chatbotContainer" class="chatbot-container">
+    <div class="chatbot-header">
+      <h3>🪐 Space AI</h3>
+      <button id="closeChatbot" class="chatbot-close-btn">×</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="message bot-message">
+        Hello! I'm Space AI, your intelligent assistant for exploring the cosmos. Ask me anything about our solar system! 🌌
+      </div>
+    </div>
+    <div class="chatbot-input-container">
+      <input type="text" id="chatbotInput" placeholder="Ask about planets, moons, or space..." />
+      <button id="sendChatbotMessage">➤</button>
+    </div>
+  </div>
+
+  <!-- Chatbot Toggle Button -->
+  <button id="chatbotToggle" class="chatbot-toggle-btn">
+    💬
+  </button>
+
   
   <script>
     function toggleCelestialPanel() {
@@ -631,6 +1531,12 @@
       } else {
         icon.textContent = '▼';
       }
+      
+      // Immediately update Special Events panel position when celestial panel changes
+      updateSpecialEventsPanelPosition();
+      
+      // Also update after animation completes for smooth positioning
+      setTimeout(updateSpecialEventsPanelPosition, 400);
     }
 
     function toggleControlPanel() {
@@ -646,6 +1552,371 @@
         icon.textContent = '▼';
       }
     }
+
+    function toggleSpecialEventsPanel() {
+      const panel = document.getElementById('specialEventsControls');
+      const icon = panel.querySelector('.control-toggle-icon');
+      
+      panel.classList.toggle('collapsed');
+      
+      // Update icon based on state
+      if (panel.classList.contains('collapsed')) {
+        icon.textContent = '►';
+      } else {
+        icon.textContent = '▼';
+      }
+      
+      // Update position after toggle
+      updateSpecialEventsPanelPosition();
+    }
+    
+    function updateSpecialEventsPanelPosition() {
+      const celestialPanel = document.getElementById('celestialPanel');
+      const specialEventsPanel = document.getElementById('specialEventsControls');
+      
+      if (celestialPanel && specialEventsPanel) {
+        const celestialRect = celestialPanel.getBoundingClientRect();
+        const isCollapsed = celestialPanel.classList.contains('collapsed');
+        
+        // Align the Special Events panel exactly with the celestial panel
+        const celestialLeft = celestialRect.left + window.scrollX;
+        const celestialWidth = celestialRect.width;
+        
+        let topPosition;
+        if (isCollapsed) {
+          // When collapsed, position right below with minimal gap
+          topPosition = celestialRect.bottom + window.scrollY + 5;
+        } else {
+          // When expanded, position only halfway down to avoid Earth area
+          const celestialTop = celestialRect.top + window.scrollY;
+          const celestialHeight = celestialRect.height;
+          topPosition = celestialTop + (celestialHeight * 0.6) + 15; // 60% down + small gap
+        }
+        
+        specialEventsPanel.style.top = topPosition + 'px';
+        specialEventsPanel.style.left = celestialLeft + 'px';
+        specialEventsPanel.style.width = celestialWidth + 'px';
+        specialEventsPanel.style.right = 'auto'; // Remove right positioning
+      }
+    }
+    
+    function toggleCelestialPanel() {
+      const panel = document.getElementById('celestialPanel');
+      const icon = panel.querySelector('.toggle-icon');
+      
+      panel.classList.toggle('collapsed');
+      
+      // Update icon based on state
+      if (panel.classList.contains('collapsed')) {
+        icon.textContent = '►';
+      } else {
+        icon.textContent = '▼';
+      }
+      
+      // Update Special Events panel position after celestial panel changes
+      setTimeout(updateSpecialEventsPanelPosition, 300); // Wait for animation
+    }
+    
+    // Update position on page load and resize
+    window.addEventListener('load', updateSpecialEventsPanelPosition);
+    window.addEventListener('resize', updateSpecialEventsPanelPosition);
+    
+    // Chatbot functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatbotContainer = document.getElementById('chatbotContainer');
+      const chatbotToggle = document.getElementById('chatbotToggle');
+      const closeChatbot = document.getElementById('closeChatbot');
+      const chatbotInput = document.getElementById('chatbotInput');
+      const sendButton = document.getElementById('sendChatbotMessage');
+      const chatbotMessages = document.getElementById('chatbotMessages');
+
+      const GEMINI_MODEL = 'gemini-2.5-flash';
+      let isSending = false;
+
+      const getGeminiApiKey = () => window.__APP_ENV?.GEMINI_API_KEY || '';
+
+      // Toggle chatbot visibility
+      chatbotToggle.addEventListener('click', function() {
+        chatbotContainer.classList.toggle('hidden');
+      });
+
+      // Close chatbot
+      closeChatbot.addEventListener('click', function() {
+        chatbotContainer.classList.add('hidden');
+      });
+
+      function renderMessageHtml(rawText) {
+        const safeText = (rawText || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        const withBold = safeText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        const lines = withBold.split(/\n+/);
+        const bulletLines = lines.filter(line => /^\s*-\s+/.test(line));
+
+        if (bulletLines.length && bulletLines.length === lines.length) {
+          const items = lines.map(line => `<li>${line.replace(/^\s*-\s+/, '').trim()}</li>`).join('');
+          return `<ul class="chatbot-bullet-list">${items}</ul>`;
+        }
+
+        return withBold.replace(/\n/g, '<br>');
+      }
+
+      function setMessageContent(target, text) {
+        if (!target) return;
+        target.innerHTML = renderMessageHtml(text);
+      }
+
+      // Send message function
+      async function sendMessage() {
+        const message = chatbotInput.value.trim();
+        if (!message || isSending) {
+          return;
+        }
+
+        // Add user message
+        addMessage(message, 'user');
+        chatbotInput.value = '';
+
+        isSending = true;
+        const pendingMessage = addMessage('Contacting Gemini...', 'bot');
+        const apiKeyInUse = getGeminiApiKey();
+
+        try {
+          const { text, reason } = await fetchGeminiResponse(message, apiKeyInUse);
+          if (text) {
+            setMessageContent(pendingMessage, text);
+          } else {
+            const fallbackNotice = reason || (apiKeyInUse ? 'Showing offline knowledge base while Gemini reconnects.' : 'Gemini live answers are unavailable because the API key is missing.');
+            setFallbackResponse(pendingMessage, message, fallbackNotice);
+          }
+        } catch (error) {
+          console.error('Gemini API error:', error);
+          const errorNotice = error?.message ? `Gemini error: ${error.message}` : 'Gemini connection problem detected.';
+          setFallbackResponse(pendingMessage, message, `${errorNotice} Showing a curated fact instead.`);
+        } finally {
+          isSending = false;
+        }
+      }
+
+      // Add message to chat
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+  messageDiv.classList.add('message');
+  messageDiv.classList.add(sender + '-message');
+  setMessageContent(messageDiv, text);
+        chatbotMessages.appendChild(messageDiv);
+
+        // Scroll to bottom
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+        return messageDiv;
+      }
+
+      // Call Gemini API for dynamic responses
+      async function fetchGeminiResponse(message, providedApiKey) {
+        const apiKey = providedApiKey || getGeminiApiKey();
+        if (!apiKey) {
+          return {
+            text: null,
+            reason: 'Gemini live answers are unavailable because the API key is missing.'
+          };
+        }
+
+  const systemPrompt = "You are Space AI, a concise guide for a 3D solar system explorer built with Three.js and Vite. Reply with at most three bullet lines using the exact format '- **Topic**: fact'. Mention interactive controls only when they directly help. Keep the tone smart, warm, and free of filler.";
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              role: 'system',
+              parts: [{ text: systemPrompt }]
+            },
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: message }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.35,
+              topK: 24,
+              topP: 0.85,
+              maxOutputTokens: 320
+            }
+          })
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const errorMessage = data?.error?.message || `Gemini API request failed with status ${response.status}`;
+          throw new Error(errorMessage);
+        }
+
+        const text = extractGeminiText(data);
+        if (text) {
+          return { text, reason: null };
+        }
+
+        const promptFeedback = data?.promptFeedback;
+        const blockReason = promptFeedback?.blockReason;
+        const safetyRatings = Array.isArray(promptFeedback?.safetyRatings) ? promptFeedback.safetyRatings : [];
+
+        let reason = 'Gemini returned an empty response.';
+        if (blockReason) {
+          reason = `Gemini blocked the answer (${blockReason.replace(/_/g, ' ').toLowerCase()}).`;
+        }
+
+        if (safetyRatings.length) {
+          const safetySummary = safetyRatings
+            .map(rating => {
+              const category = rating?.category?.replace('HARM_CATEGORY_', '').toLowerCase().replace(/_/g, ' ');
+              const probability = rating?.probability ? rating.probability.toLowerCase().replace(/_/g, ' ') : 'unspecified probability';
+              return `${category || 'safety'}: ${probability}`;
+            })
+            .join(', ');
+          reason += ` Safety feedback: ${safetySummary}.`;
+        }
+
+        console.warn('Gemini response lacked text; falling back to curated content.', { promptFeedback, data });
+        return { text: null, reason };
+      }
+
+      function extractGeminiText(data) {
+        const candidates = data?.candidates;
+        if (!Array.isArray(candidates) || !candidates.length) {
+          return null;
+        }
+
+        for (const candidate of candidates) {
+          const parts = candidate?.content?.parts;
+          if (!Array.isArray(parts)) {
+            continue;
+          }
+
+          const text = parts
+            .map(part => part?.text || '')
+            .join('\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+
+          if (text) {
+            return text;
+          }
+        }
+
+        return null;
+      }
+
+      function setFallbackResponse(messageElement, userMessage, notice) {
+        const fallback = getFallbackBotResponse(userMessage);
+        const combined = notice ? `${fallback}\n\n${notice}` : fallback;
+        setMessageContent(messageElement, combined);
+      }
+
+      // Get fallback bot response based on user input
+      function getFallbackBotResponse(message) {
+        const lowerMsg = message.toLowerCase();
+        
+        // Planet information
+        if (lowerMsg.includes('sun')) {
+          return "- **Sun**: Yellow-dwarf star with 99.86% of system mass and a surface near 5,778 K.";
+        }
+        
+        if (lowerMsg.includes('mercury')) {
+          return "- **Mercury**: Smallest planet with extreme swings from -173°C nights to 427°C days due to scant atmosphere.";
+        }
+        
+        if (lowerMsg.includes('venus')) {
+          return "- **Venus**: Earth-sized twin wrapped in a dense CO₂ atmosphere that drives the hottest surface in the solar system.";
+        }
+        
+        if (lowerMsg.includes('earth')) {
+          return "- **Earth**: Third planet, 71% oceans, and the only world where life is confirmed.";
+        }
+        
+        if (lowerMsg.includes('mars')) {
+          return "- **Mars**: Iron-rich 'Red Planet' with thin air and tiny moons Phobos and Deimos.";
+        }
+        
+        if (lowerMsg.includes('jupiter')) {
+          return "- **Jupiter**: Giant gas world with 80+ moons and the centuries-old Great Red Spot storm.";
+        }
+        
+        if (lowerMsg.includes('saturn')) {
+          return "- **Saturn**: Second-largest planet highlighted by bright rings of ice and rock.";
+        }
+        
+        if (lowerMsg.includes('uranus')) {
+          return "- **Uranus**: Methane-tinted ice giant tipped 98° on its side, giving extreme seasons.";
+        }
+        
+        if (lowerMsg.includes('neptune')) {
+          return "- **Neptune**: Distant ice giant with supersonic winds and a deep azure hue.";
+        }
+        
+        // Moon information
+        if (lowerMsg.includes('moon') || lowerMsg.includes('luna')) {
+          return "- **Earth's Moon**: Fifth-largest satellite, likely born from a giant impact 4.5 billion years ago.";
+        }
+        
+        // General space questions
+        if (lowerMsg.includes('solar system')) {
+          return "- **Solar System**: Gravity binds the Sun, planets, moons, asteroids, and comets formed from a 4.6-billion-year-old gas cloud.";
+        }
+        
+        if (lowerMsg.includes('galaxy')) {
+          return "- **Galaxy**: Vast gravitational islands of stars, gas, and dust; the Milky Way hosts our solar system.";
+        }
+        
+        if (lowerMsg.includes('black hole')) {
+          return "- **Black hole**: Collapsed star core where gravity is so intense that not even light escapes.";
+        }
+        
+        if (lowerMsg.includes('comet')) {
+          return "- **Comet**: Icy body from the outer solar system that grows a glowing coma and tail near the Sun.";
+        }
+        
+        if (lowerMsg.includes('asteroid')) {
+          return "- **Asteroid**: Rocky Sun-orbiting body, often in the belt between Mars and Jupiter, ranging from pebbles to dwarf-planet scale.";
+        }
+        
+        // Controls and features
+        if (lowerMsg.includes('control') || lowerMsg.includes('how to') || lowerMsg.includes('use')) {
+          return "- **Explore**: Drag to orbit, scroll to zoom, and click planets for profiles; tweak speed and orbits in the Mission Control panel.";
+        }
+        
+        if (lowerMsg.includes('music') || lowerMsg.includes('sound')) {
+          return "- **Music**: Tap the music button in Mission Control or the floating vinyl icon to start or mute the soundtrack.";
+        }
+        
+        if (lowerMsg.includes('eclipse')) {
+          return "- **Eclipse tours**: Use the Special Events panel buttons for guided solar and lunar eclipse flythroughs with kid-friendly narration.";
+        }
+        
+        // Default response
+        return "- **Space AI**: Ask about planets, moons, missions, or how to use the explorer's controls.";
+      }
+      
+      // Event listeners for sending messages
+      sendButton.addEventListener('click', sendMessage);
+      
+      chatbotInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      // Add welcome message
+      setTimeout(() => {
+        addMessage("Welcome to the 3D Solar System Explorer! I'm Space AI, here to help you learn about space. Try asking me about a specific planet or space phenomenon.", 'bot');
+      }, 2000);
+    });
   </script>
 </body>
 </html>

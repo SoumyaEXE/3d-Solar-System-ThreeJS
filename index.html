@@ -1133,6 +1133,11 @@
       max-width: 80%;
     }
 
+    .message .chatbot-bullet-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
     .bot-message {
       background: rgba(0, 29, 61, 0.8);
       color: var(--nasa-white);
@@ -1624,127 +1629,278 @@
       const chatbotInput = document.getElementById('chatbotInput');
       const sendButton = document.getElementById('sendChatbotMessage');
       const chatbotMessages = document.getElementById('chatbotMessages');
-      
+
+      const GEMINI_MODEL = 'gemini-2.5-flash';
+      let isSending = false;
+
+      const getGeminiApiKey = () => window.__APP_ENV?.GEMINI_API_KEY || '';
+
       // Toggle chatbot visibility
       chatbotToggle.addEventListener('click', function() {
         chatbotContainer.classList.toggle('hidden');
       });
-      
+
       // Close chatbot
       closeChatbot.addEventListener('click', function() {
         chatbotContainer.classList.add('hidden');
       });
-      
+
+      function renderMessageHtml(rawText) {
+        const safeText = (rawText || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        const withBold = safeText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        const lines = withBold.split(/\n+/);
+        const bulletLines = lines.filter(line => /^\s*-\s+/.test(line));
+
+        if (bulletLines.length && bulletLines.length === lines.length) {
+          const items = lines.map(line => `<li>${line.replace(/^\s*-\s+/, '').trim()}</li>`).join('');
+          return `<ul class="chatbot-bullet-list">${items}</ul>`;
+        }
+
+        return withBold.replace(/\n/g, '<br>');
+      }
+
+      function setMessageContent(target, text) {
+        if (!target) return;
+        target.innerHTML = renderMessageHtml(text);
+      }
+
       // Send message function
-      function sendMessage() {
+      async function sendMessage() {
         const message = chatbotInput.value.trim();
-        if (message) {
-          // Add user message
-          addMessage(message, 'user');
-          chatbotInput.value = '';
-          
-          // Simulate bot response after a short delay
-          setTimeout(() => {
-            const response = getBotResponse(message);
-            addMessage(response, 'bot');
-          }, 1000);
+        if (!message || isSending) {
+          return;
+        }
+
+        // Add user message
+        addMessage(message, 'user');
+        chatbotInput.value = '';
+
+        isSending = true;
+        const pendingMessage = addMessage('Contacting Gemini...', 'bot');
+        const apiKeyInUse = getGeminiApiKey();
+
+        try {
+          const { text, reason } = await fetchGeminiResponse(message, apiKeyInUse);
+          if (text) {
+            setMessageContent(pendingMessage, text);
+          } else {
+            const fallbackNotice = reason || (apiKeyInUse ? 'Showing offline knowledge base while Gemini reconnects.' : 'Gemini live answers are unavailable because the API key is missing.');
+            setFallbackResponse(pendingMessage, message, fallbackNotice);
+          }
+        } catch (error) {
+          console.error('Gemini API error:', error);
+          const errorNotice = error?.message ? `Gemini error: ${error.message}` : 'Gemini connection problem detected.';
+          setFallbackResponse(pendingMessage, message, `${errorNotice} Showing a curated fact instead.`);
+        } finally {
+          isSending = false;
         }
       }
-      
+
       // Add message to chat
       function addMessage(text, sender) {
         const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-        messageDiv.classList.add(sender + '-message');
-        messageDiv.textContent = text;
+  messageDiv.classList.add('message');
+  messageDiv.classList.add(sender + '-message');
+  setMessageContent(messageDiv, text);
         chatbotMessages.appendChild(messageDiv);
-        
+
         // Scroll to bottom
         chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+        return messageDiv;
       }
-      
-      // Get bot response based on user input
-      function getBotResponse(message) {
+
+      // Call Gemini API for dynamic responses
+      async function fetchGeminiResponse(message, providedApiKey) {
+        const apiKey = providedApiKey || getGeminiApiKey();
+        if (!apiKey) {
+          return {
+            text: null,
+            reason: 'Gemini live answers are unavailable because the API key is missing.'
+          };
+        }
+
+  const systemPrompt = "You are Space AI, a concise guide for a 3D solar system explorer built with Three.js and Vite. Reply with at most three bullet lines using the exact format '- **Topic**: fact'. Mention interactive controls only when they directly help. Keep the tone smart, warm, and free of filler.";
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              role: 'system',
+              parts: [{ text: systemPrompt }]
+            },
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: message }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.35,
+              topK: 24,
+              topP: 0.85,
+              maxOutputTokens: 320
+            }
+          })
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const errorMessage = data?.error?.message || `Gemini API request failed with status ${response.status}`;
+          throw new Error(errorMessage);
+        }
+
+        const text = extractGeminiText(data);
+        if (text) {
+          return { text, reason: null };
+        }
+
+        const promptFeedback = data?.promptFeedback;
+        const blockReason = promptFeedback?.blockReason;
+        const safetyRatings = Array.isArray(promptFeedback?.safetyRatings) ? promptFeedback.safetyRatings : [];
+
+        let reason = 'Gemini returned an empty response.';
+        if (blockReason) {
+          reason = `Gemini blocked the answer (${blockReason.replace(/_/g, ' ').toLowerCase()}).`;
+        }
+
+        if (safetyRatings.length) {
+          const safetySummary = safetyRatings
+            .map(rating => {
+              const category = rating?.category?.replace('HARM_CATEGORY_', '').toLowerCase().replace(/_/g, ' ');
+              const probability = rating?.probability ? rating.probability.toLowerCase().replace(/_/g, ' ') : 'unspecified probability';
+              return `${category || 'safety'}: ${probability}`;
+            })
+            .join(', ');
+          reason += ` Safety feedback: ${safetySummary}.`;
+        }
+
+        console.warn('Gemini response lacked text; falling back to curated content.', { promptFeedback, data });
+        return { text: null, reason };
+      }
+
+      function extractGeminiText(data) {
+        const candidates = data?.candidates;
+        if (!Array.isArray(candidates) || !candidates.length) {
+          return null;
+        }
+
+        for (const candidate of candidates) {
+          const parts = candidate?.content?.parts;
+          if (!Array.isArray(parts)) {
+            continue;
+          }
+
+          const text = parts
+            .map(part => part?.text || '')
+            .join('\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+
+          if (text) {
+            return text;
+          }
+        }
+
+        return null;
+      }
+
+      function setFallbackResponse(messageElement, userMessage, notice) {
+        const fallback = getFallbackBotResponse(userMessage);
+        const combined = notice ? `${fallback}\n\n${notice}` : fallback;
+        setMessageContent(messageElement, combined);
+      }
+
+      // Get fallback bot response based on user input
+      function getFallbackBotResponse(message) {
         const lowerMsg = message.toLowerCase();
         
         // Planet information
         if (lowerMsg.includes('sun')) {
-          return "The Sun is a yellow dwarf star at the center of our solar system. It contains 99.86% of the mass in the Solar System and provides energy for life on Earth. Its surface temperature is about 5,778 K!";
+          return "- **Sun**: Yellow-dwarf star with 99.86% of system mass and a surface near 5,778 K.";
         }
         
         if (lowerMsg.includes('mercury')) {
-          return "Mercury is the smallest and innermost planet in the Solar System. It has no atmosphere to retain heat, resulting in the largest temperature variation of any planet: from -173°C at night to 427°C during the day.";
+          return "- **Mercury**: Smallest planet with extreme swings from -173°C nights to 427°C days due to scant atmosphere.";
         }
         
         if (lowerMsg.includes('venus')) {
-          return "Venus is the second planet from the Sun and Earth's closest planetary neighbor. It's similar in size and mass to Earth but has a thick, toxic atmosphere that traps heat, making it the hottest planet in our solar system.";
+          return "- **Venus**: Earth-sized twin wrapped in a dense CO₂ atmosphere that drives the hottest surface in the solar system.";
         }
         
         if (lowerMsg.includes('earth')) {
-          return "Earth is our home planet and the only known place in the universe with life. It's the third planet from the Sun and the only astronomical object known to harbor life. About 29% of Earth's surface is land.";
+          return "- **Earth**: Third planet, 71% oceans, and the only world where life is confirmed.";
         }
         
         if (lowerMsg.includes('mars')) {
-          return "Mars is the fourth planet from the Sun, often called the 'Red Planet' due to its reddish appearance caused by iron oxide on its surface. It has two small moons, Phobos and Deimos.";
+          return "- **Mars**: Iron-rich 'Red Planet' with thin air and tiny moons Phobos and Deimos.";
         }
         
         if (lowerMsg.includes('jupiter')) {
-          return "Jupiter is the largest planet in our solar system. It's a gas giant with more than 80 known moons. Its most famous feature is the Great Red Spot, a giant storm larger than Earth that has been raging for centuries.";
+          return "- **Jupiter**: Giant gas world with 80+ moons and the centuries-old Great Red Spot storm.";
         }
         
         if (lowerMsg.includes('saturn')) {
-          return "Saturn is the sixth planet from the Sun and the second-largest in the Solar System. It's famous for its prominent ring system, which is composed mainly of ice particles, rocky debris, and dust.";
+          return "- **Saturn**: Second-largest planet highlighted by bright rings of ice and rock.";
         }
         
         if (lowerMsg.includes('uranus')) {
-          return "Uranus is the seventh planet from the Sun. It's an ice giant with a blue-green color due to methane in its atmosphere. Uniquely, it rotates on its side, with its axis tilted at about 98 degrees.";
+          return "- **Uranus**: Methane-tinted ice giant tipped 98° on its side, giving extreme seasons.";
         }
         
         if (lowerMsg.includes('neptune')) {
-          return "Neptune is the eighth and farthest-known planet from the Sun. It's the fourth-largest planet by diameter and the third-largest by mass. It has the strongest winds of any planet in the Solar System.";
+          return "- **Neptune**: Distant ice giant with supersonic winds and a deep azure hue.";
         }
         
         // Moon information
         if (lowerMsg.includes('moon') || lowerMsg.includes('luna')) {
-          return "The Moon is Earth's only natural satellite. It's the fifth largest moon in the Solar System and is thought to have formed about 4.5 billion years ago from debris after a Mars-sized object collided with Earth.";
+          return "- **Earth's Moon**: Fifth-largest satellite, likely born from a giant impact 4.5 billion years ago.";
         }
         
         // General space questions
         if (lowerMsg.includes('solar system')) {
-          return "Our solar system consists of the Sun and everything bound to it by gravity - planets, moons, asteroids, comets, and meteoroids. It formed about 4.6 billion years ago from a giant, rotating cloud of gas and dust.";
+          return "- **Solar System**: Gravity binds the Sun, planets, moons, asteroids, and comets formed from a 4.6-billion-year-old gas cloud.";
         }
         
         if (lowerMsg.includes('galaxy')) {
-          return "A galaxy is a system of millions or billions of stars, together with gas and dust, held together by gravitational attraction. Our galaxy is the Milky Way, which contains our Solar System.";
+          return "- **Galaxy**: Vast gravitational islands of stars, gas, and dust; the Milky Way hosts our solar system.";
         }
         
         if (lowerMsg.includes('black hole')) {
-          return "A black hole is a region of spacetime where gravity is so strong that nothing—no particles or even electromagnetic radiation such as light—can escape from it. They form when massive stars collapse at the end of their life cycle.";
+          return "- **Black hole**: Collapsed star core where gravity is so intense that not even light escapes.";
         }
         
         if (lowerMsg.includes('comet')) {
-          return "A comet is an icy, small Solar System body that, when passing close to the Sun, warms and begins to release gases, forming a visible atmosphere or coma, and sometimes also a tail. They originate from the outer regions of the Solar System.";
+          return "- **Comet**: Icy body from the outer solar system that grows a glowing coma and tail near the Sun.";
         }
         
         if (lowerMsg.includes('asteroid')) {
-          return "An asteroid is a rocky object that orbits the Sun. Most asteroids are found in the main asteroid belt between Mars and Jupiter. They range in size from tiny pebbles to objects hundreds of kilometers across.";
+          return "- **Asteroid**: Rocky Sun-orbiting body, often in the belt between Mars and Jupiter, ranging from pebbles to dwarf-planet scale.";
         }
         
         // Controls and features
         if (lowerMsg.includes('control') || lowerMsg.includes('how to') || lowerMsg.includes('use')) {
-          return "You can explore the solar system by dragging to rotate your view, scrolling to zoom in/out, and clicking on planets to learn more. Use the control panel on the left to adjust speed, toggle orbits, and more!";
+          return "- **Explore**: Drag to orbit, scroll to zoom, and click planets for profiles; tweak speed and orbits in the Mission Control panel.";
         }
         
         if (lowerMsg.includes('music') || lowerMsg.includes('sound')) {
-          return "You can toggle the space soundtrack using the music button in the control panel or the floating music button in the bottom right. The music enhances the immersive experience of exploring space!";
+          return "- **Music**: Tap the music button in Mission Control or the floating vinyl icon to start or mute the soundtrack.";
         }
         
         if (lowerMsg.includes('eclipse')) {
-          return "You can experience solar and lunar eclipse tours using the buttons in the Special Events panel. These cinematic tours show you how eclipses happen and provide educational explanations, especially designed for children.";
+          return "- **Eclipse tours**: Use the Special Events panel buttons for guided solar and lunar eclipse flythroughs with kid-friendly narration.";
         }
         
         // Default response
-        return "I'm your Space Explorer Assistant! Ask me about planets, moons, the Sun, or other space phenomena. You can also ask about how to use the controls or features of this solar system explorer.";
+        return "- **Space AI**: Ask about planets, moons, missions, or how to use the explorer's controls.";
       }
       
       // Event listeners for sending messages
