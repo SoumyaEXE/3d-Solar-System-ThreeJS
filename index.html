@@ -1048,6 +1048,211 @@
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
       transform: scale(1.05);
     }
+
+    /* Chatbot Styles */
+    .chatbot-container {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 350px;
+      max-height: 500px;
+      background: linear-gradient(135deg, var(--panel-bg), rgba(11, 61, 145, 0.95));
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(11, 61, 145, 0.4);
+      backdrop-filter: blur(15px);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transform: translateY(0);
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-container.hidden {
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(135deg, var(--nasa-red), #d32f2f);
+      padding: 15px;
+      border-radius: 10px 10px 0 0;
+      border-bottom: 2px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chatbot-header h3 {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--nasa-white);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .chatbot-close-btn {
+      background: none;
+      border: none;
+      color: var(--nasa-white);
+      font-size: 20px;
+      cursor: pointer;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      max-width: 80%;
+    }
+
+    .bot-message {
+      background: rgba(0, 29, 61, 0.8);
+      color: var(--nasa-white);
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+    }
+
+    .user-message {
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      color: var(--nasa-white);
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+    }
+
+    .chatbot-input-container {
+      display: flex;
+      padding: 15px;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #chatbotInput {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 10px 15px;
+      color: var(--nasa-white);
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 14px;
+      outline: none;
+    }
+
+    #chatbotInput:focus {
+      border-color: var(--star-gold);
+      box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.3);
+    }
+
+    #chatbotInput::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    #sendChatbotMessage {
+      background: linear-gradient(135deg, var(--star-gold), #ffa000);
+      color: var(--nasa-black);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    #sendChatbotMessage:hover {
+      background: linear-gradient(135deg, #ffa000, var(--star-gold));
+      transform: scale(1.05);
+    }
+
+    .chatbot-toggle-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--nasa-blue), var(--cosmic-blue));
+      border: 2px solid var(--star-gold);
+      color: var(--star-gold);
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(11, 61, 145, 0.4);
+      z-index: 999;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chatbot-toggle-btn:hover {
+      background: linear-gradient(135deg, var(--cosmic-blue), var(--nasa-blue));
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(255, 214, 10, 0.4);
+    }
+
+    /* Custom scrollbar for chatbot */
+    .chatbot-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chatbot-messages::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .chatbot-messages::-webkit-scrollbar-thumb {
+      background: var(--star-gold);
+      border-radius: 2px;
+    }
+
+    /* Mobile responsiveness for chatbot */
+    @media (max-width: 768px) {
+      .chatbot-container {
+        width: calc(100% - 40px);
+        bottom: 90px;
+        right: 20px;
+      }
+      
+      .chatbot-toggle-btn {
+        bottom: 90px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1134,7 +1339,7 @@
     🌍 11 Dwarf Planets<br>
     ☄️ 4 Asteroid Belts<br>
     🌌 Trans-Neptunian Objects<br>
-    🌙 50+ Moons<br>
+    🙀 50+ Moons<br>
     ✨ Glowing Orbit Rings<br>
     🎵 Atmospheric Music<br>
     🛰️ Real-time NASA Data<br>
@@ -1284,6 +1489,28 @@
     Your browser does not support the audio element.
   </audio>
 
+  <!-- Chatbot Container -->
+  <div id="chatbotContainer" class="chatbot-container">
+    <div class="chatbot-header">
+      <h3>🪐 Space AI</h3>
+      <button id="closeChatbot" class="chatbot-close-btn">×</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="message bot-message">
+        Hello! I'm Space AI, your intelligent assistant for exploring the cosmos. Ask me anything about our solar system! 🌌
+      </div>
+    </div>
+    <div class="chatbot-input-container">
+      <input type="text" id="chatbotInput" placeholder="Ask about planets, moons, or space..." />
+      <button id="sendChatbotMessage">➤</button>
+    </div>
+  </div>
+
+  <!-- Chatbot Toggle Button -->
+  <button id="chatbotToggle" class="chatbot-toggle-btn">
+    💬
+  </button>
+
   <script type="module" src="./main.js"></script>
   
   <script>
@@ -1388,6 +1615,152 @@
     // Update position on page load and resize
     window.addEventListener('load', updateSpecialEventsPanelPosition);
     window.addEventListener('resize', updateSpecialEventsPanelPosition);
+    
+    // Chatbot functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatbotContainer = document.getElementById('chatbotContainer');
+      const chatbotToggle = document.getElementById('chatbotToggle');
+      const closeChatbot = document.getElementById('closeChatbot');
+      const chatbotInput = document.getElementById('chatbotInput');
+      const sendButton = document.getElementById('sendChatbotMessage');
+      const chatbotMessages = document.getElementById('chatbotMessages');
+      
+      // Toggle chatbot visibility
+      chatbotToggle.addEventListener('click', function() {
+        chatbotContainer.classList.toggle('hidden');
+      });
+      
+      // Close chatbot
+      closeChatbot.addEventListener('click', function() {
+        chatbotContainer.classList.add('hidden');
+      });
+      
+      // Send message function
+      function sendMessage() {
+        const message = chatbotInput.value.trim();
+        if (message) {
+          // Add user message
+          addMessage(message, 'user');
+          chatbotInput.value = '';
+          
+          // Simulate bot response after a short delay
+          setTimeout(() => {
+            const response = getBotResponse(message);
+            addMessage(response, 'bot');
+          }, 1000);
+        }
+      }
+      
+      // Add message to chat
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(sender + '-message');
+        messageDiv.textContent = text;
+        chatbotMessages.appendChild(messageDiv);
+        
+        // Scroll to bottom
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
+      
+      // Get bot response based on user input
+      function getBotResponse(message) {
+        const lowerMsg = message.toLowerCase();
+        
+        // Planet information
+        if (lowerMsg.includes('sun')) {
+          return "The Sun is a yellow dwarf star at the center of our solar system. It contains 99.86% of the mass in the Solar System and provides energy for life on Earth. Its surface temperature is about 5,778 K!";
+        }
+        
+        if (lowerMsg.includes('mercury')) {
+          return "Mercury is the smallest and innermost planet in the Solar System. It has no atmosphere to retain heat, resulting in the largest temperature variation of any planet: from -173°C at night to 427°C during the day.";
+        }
+        
+        if (lowerMsg.includes('venus')) {
+          return "Venus is the second planet from the Sun and Earth's closest planetary neighbor. It's similar in size and mass to Earth but has a thick, toxic atmosphere that traps heat, making it the hottest planet in our solar system.";
+        }
+        
+        if (lowerMsg.includes('earth')) {
+          return "Earth is our home planet and the only known place in the universe with life. It's the third planet from the Sun and the only astronomical object known to harbor life. About 29% of Earth's surface is land.";
+        }
+        
+        if (lowerMsg.includes('mars')) {
+          return "Mars is the fourth planet from the Sun, often called the 'Red Planet' due to its reddish appearance caused by iron oxide on its surface. It has two small moons, Phobos and Deimos.";
+        }
+        
+        if (lowerMsg.includes('jupiter')) {
+          return "Jupiter is the largest planet in our solar system. It's a gas giant with more than 80 known moons. Its most famous feature is the Great Red Spot, a giant storm larger than Earth that has been raging for centuries.";
+        }
+        
+        if (lowerMsg.includes('saturn')) {
+          return "Saturn is the sixth planet from the Sun and the second-largest in the Solar System. It's famous for its prominent ring system, which is composed mainly of ice particles, rocky debris, and dust.";
+        }
+        
+        if (lowerMsg.includes('uranus')) {
+          return "Uranus is the seventh planet from the Sun. It's an ice giant with a blue-green color due to methane in its atmosphere. Uniquely, it rotates on its side, with its axis tilted at about 98 degrees.";
+        }
+        
+        if (lowerMsg.includes('neptune')) {
+          return "Neptune is the eighth and farthest-known planet from the Sun. It's the fourth-largest planet by diameter and the third-largest by mass. It has the strongest winds of any planet in the Solar System.";
+        }
+        
+        // Moon information
+        if (lowerMsg.includes('moon') || lowerMsg.includes('luna')) {
+          return "The Moon is Earth's only natural satellite. It's the fifth largest moon in the Solar System and is thought to have formed about 4.5 billion years ago from debris after a Mars-sized object collided with Earth.";
+        }
+        
+        // General space questions
+        if (lowerMsg.includes('solar system')) {
+          return "Our solar system consists of the Sun and everything bound to it by gravity - planets, moons, asteroids, comets, and meteoroids. It formed about 4.6 billion years ago from a giant, rotating cloud of gas and dust.";
+        }
+        
+        if (lowerMsg.includes('galaxy')) {
+          return "A galaxy is a system of millions or billions of stars, together with gas and dust, held together by gravitational attraction. Our galaxy is the Milky Way, which contains our Solar System.";
+        }
+        
+        if (lowerMsg.includes('black hole')) {
+          return "A black hole is a region of spacetime where gravity is so strong that nothing—no particles or even electromagnetic radiation such as light—can escape from it. They form when massive stars collapse at the end of their life cycle.";
+        }
+        
+        if (lowerMsg.includes('comet')) {
+          return "A comet is an icy, small Solar System body that, when passing close to the Sun, warms and begins to release gases, forming a visible atmosphere or coma, and sometimes also a tail. They originate from the outer regions of the Solar System.";
+        }
+        
+        if (lowerMsg.includes('asteroid')) {
+          return "An asteroid is a rocky object that orbits the Sun. Most asteroids are found in the main asteroid belt between Mars and Jupiter. They range in size from tiny pebbles to objects hundreds of kilometers across.";
+        }
+        
+        // Controls and features
+        if (lowerMsg.includes('control') || lowerMsg.includes('how to') || lowerMsg.includes('use')) {
+          return "You can explore the solar system by dragging to rotate your view, scrolling to zoom in/out, and clicking on planets to learn more. Use the control panel on the left to adjust speed, toggle orbits, and more!";
+        }
+        
+        if (lowerMsg.includes('music') || lowerMsg.includes('sound')) {
+          return "You can toggle the space soundtrack using the music button in the control panel or the floating music button in the bottom right. The music enhances the immersive experience of exploring space!";
+        }
+        
+        if (lowerMsg.includes('eclipse')) {
+          return "You can experience solar and lunar eclipse tours using the buttons in the Special Events panel. These cinematic tours show you how eclipses happen and provide educational explanations, especially designed for children.";
+        }
+        
+        // Default response
+        return "I'm your Space Explorer Assistant! Ask me about planets, moons, the Sun, or other space phenomena. You can also ask about how to use the controls or features of this solar system explorer.";
+      }
+      
+      // Event listeners for sending messages
+      sendButton.addEventListener('click', sendMessage);
+      
+      chatbotInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      // Add welcome message
+      setTimeout(() => {
+        addMessage("Welcome to the 3D Solar System Explorer! I'm Space AI, here to help you learn about space. Try asking me about a specific planet or space phenomenon.", 'bot');
+      }, 2000);
+    });
   </script>
 </body>
 </html>

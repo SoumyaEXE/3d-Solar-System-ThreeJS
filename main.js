@@ -1861,6 +1861,12 @@ const floatingMuteMusicBtn = document.getElementById('floatingMuteMusicBtn');
 const volumeControl = document.getElementById('volumeControl');
 const volumeValue = document.getElementById('volumeValue');
 
+// Ensure music loops properly
+spaceMusic.addEventListener('ended', function() {
+  this.currentTime = 0;
+  this.play();
+});
+
 let isMusicPlaying = false;
 
 let audioContext;
@@ -1997,6 +2003,9 @@ if (volumeControl && volumeValue) {
   });
   spaceMusic.volume = 0.3;
 }
+
+// Set initial volume for proper looping
+spaceMusic.volume = 0.3;
 
 const orbitsBtn = document.getElementById('orbitsBtn');
 if (orbitsBtn) {
@@ -2940,10 +2949,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
   };
+  
+  // Start music automatically when page loads
+  setTimeout(() => {
+    startMusic();
+  }, 1000);
 });
 
 // Keyboard shortcuts
 window.addEventListener('keydown', (event) => {
+  // Check if focus is on chat input to allow normal typing
+  const chatInput = document.getElementById('chatbotInput');
+  if (document.activeElement === chatInput) {
+    return; // Let the spacebar work normally in the chat input
+  }
+  
   switch(event.key.toLowerCase()) {
     case ' ': // Spacebar to pause/resume
       event.preventDefault();
