@@ -30,8 +30,7 @@ VITE_GEMINI_API_KEY=your_google_ai_studio_key
 - 🖱️ **Mouse controls** — zoom, pan, and rotate  
 - ⚡ Built with **Vite** for fast loading  
 - 📱 **Responsive design** (desktop & mobile)  
-## -☀️Most Wanted Eclipses With Cinematic View And Explaination For Childrens🌓
-##
+<!-- ## -☀️Most Wanted Eclipses With Cinematic View And Explaination For Childrens🌓 -->
 
 ---
 
