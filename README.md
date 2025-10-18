@@ -22,8 +22,7 @@
 - 🖱️ **Mouse controls** — zoom, pan, and rotate  
 - ⚡ Built with **Vite** for fast loading  
 - 📱 **Responsive design** (desktop & mobile)  
-## -☀️Most Wanted Eclipses With Cinematic View And Explaination For Childrens🌓
-##
+<!-- ## -☀️Most Wanted Eclipses With Cinematic View And Explaination For Childrens🌓 -->
 
 ---
 
